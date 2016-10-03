@@ -36,9 +36,9 @@ import org.openide.util.NbBundle.Messages;
         preferredID = "NbEvidExplorerTopComponent"
 )
 @Messages({
-  "CTL_NbEvidExplorerAction=NbEvidExplorer",
-  "CTL_NbEvidExplorerTopComponent=NbEvidExplorer Window",
-  "HINT_NbEvidExplorerTopComponent=This is a NbEvidExplorer window"
+  "CTL_NbEvidExplorerAction=Databases Window",
+  "CTL_NbEvidExplorerTopComponent=Databases",
+  "HINT_NbEvidExplorerTopComponent=This is a databases window"
 })
 public final class NbEvidExplorerTopComponent extends TopComponent implements ExplorerManager.Provider {
   private final ExplorerManager manager = new ExplorerManager();
@@ -52,7 +52,7 @@ public final class NbEvidExplorerTopComponent extends TopComponent implements Ex
     setLayout(new BorderLayout());
     add(beanTreeView, BorderLayout.CENTER);
     
-//    beanTreeView.setRootVisible(false);
+    beanTreeView.setRootVisible(false);
     
     manager.setRootContext(NbEvidExplorerRootNode.create());
   }

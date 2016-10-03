@@ -6,6 +6,7 @@
 package mox.nbevid.explorer;
 
 
+import java.io.File;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 
@@ -15,7 +16,14 @@ import org.openide.nodes.Children;
  * @author martin
  */
 public class DatabaseNode extends AbstractNode {
-  public DatabaseNode() {
+  private final String name;
+  private final File dbDirectory;
+
+  public DatabaseNode(String name, File dbDirectory) {
+    // TODO: tu uz by mala prist nacitana SpendingsDatabase (zatial bez rokov)
+    //super(Children.create(factory, true));
     super(Children.LEAF);
+    this.name = name;
+    this.dbDirectory = dbDirectory;
   }
 }

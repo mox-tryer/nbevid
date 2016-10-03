@@ -77,16 +77,16 @@ public class NbEvidExplorerRootNode extends AbstractNode {
   
   private static class RootNodeKey {
     private final String name;
-    private final File file;
+    private final File dbDirectory;
 
-    public RootNodeKey(String name, File file) {
+    public RootNodeKey(String name, File dbDirectory) {
       this.name = name;
-      this.file = file;
+      this.dbDirectory = dbDirectory;
     }
 
     private Node getRootNode() {
       // TODO: dokoncit
-      return new DatabaseNode();
+      return new DatabaseNode(name, dbDirectory);
     }
   }
 }
