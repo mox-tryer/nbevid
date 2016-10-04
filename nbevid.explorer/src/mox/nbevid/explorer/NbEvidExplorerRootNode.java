@@ -7,9 +7,16 @@ package mox.nbevid.explorer;
 
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.prefs.BackingStoreException;
+import java.util.prefs.NodeChangeEvent;
+import java.util.prefs.NodeChangeListener;
 import java.util.prefs.Preferences;
+import mox.nbevid.persistence.SpendingsDbPersister;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Children;
@@ -47,10 +54,33 @@ public class NbEvidExplorerRootNode extends AbstractNode {
   }
   
   private static class Factory extends ChildFactory<RootNodeKey> {
+    private final Preferences prefs;
+    
+    Factory() {
+      this.prefs = NbPreferences.forModule(NbEvidExplorerRootNode.class);
+      
+      this.prefs.addNodeChangeListener(new NodeChangeListener() {
+        @Override
+        public void childAdded(NodeChangeEvent evt) {
+          processEvent(evt);
+        }
+
+        @Override
+        public void childRemoved(NodeChangeEvent evt) {
+          processEvent(evt);
+        }
+
+        private void processEvent(NodeChangeEvent evt) {
+          if (evt.getChild().name().startsWith("evidInst.")) {
+            refresh(false);
+          }
+        }
+      });      
+    }
+    
     @Override
     protected boolean createKeys(List<RootNodeKey> toPopulate) {
-      Preferences prefs = NbPreferences.forModule(NbEvidExplorerRootNode.class);
-      
+      ArrayList<RootNodeKey> keys = new ArrayList<>();
       try {
         for (String child : prefs.childrenNames()) {
           if (child.startsWith("evidInst.")) {
@@ -58,13 +88,16 @@ public class NbEvidExplorerRootNode extends AbstractNode {
             String name = evidInstancePrefs.get("name", "");
             String path = evidInstancePrefs.get("path", "");
             if (!name.isEmpty() && !path.isEmpty()) {
-              toPopulate.add(new RootNodeKey(name, new File(path)));
+              keys.add(new RootNodeKey(name, new File(path)));
             }
           }
         }
       } catch (BackingStoreException ex) {
         Exceptions.printStackTrace(ex);
       }
+      
+      Collections.sort(keys);
+      toPopulate.addAll(keys);
       
       return true;
     }
@@ -73,9 +106,13 @@ public class NbEvidExplorerRootNode extends AbstractNode {
     protected Node createNodeForKey(RootNodeKey key) {
       return key.getRootNode();
     }
+    
+    public void reloadRootNodes() {
+      refresh(false);
+    }
   }
   
-  private static class RootNodeKey {
+  private static class RootNodeKey implements Comparable<RootNodeKey> {
     private final String name;
     private final File dbDirectory;
 
@@ -85,8 +122,43 @@ public class NbEvidExplorerRootNode extends AbstractNode {
     }
 
     private Node getRootNode() {
-      // TODO: dokoncit
-      return new DatabaseNode(name, dbDirectory);
+      try {
+        // TODO: dokoncit
+        return new DatabaseNode(name, dbDirectory, SpendingsDbPersister.getDefault().load(dbDirectory));
+      } catch (IOException ex) {
+        Exceptions.printStackTrace(ex);
+        return null;
+      }
+    }
+
+    @Override
+    public int compareTo(RootNodeKey o) {
+      return name.compareTo(o.name);
+    }
+
+    @Override
+    public int hashCode() {
+      int hash = 3;
+      hash = 97 * hash + Objects.hashCode(this.dbDirectory);
+      return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      final RootNodeKey other = (RootNodeKey) obj;
+      if (!Objects.equals(this.dbDirectory, other.dbDirectory)) {
+        return false;
+      }
+      return true;
     }
   }
 }

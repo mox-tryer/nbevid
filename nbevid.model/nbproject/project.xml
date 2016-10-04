@@ -6,7 +6,9 @@
             <code-name-base>mox.nbevid.model</code-name-base>
             <suite-component/>
             <module-dependencies/>
-            <public-packages/>
+            <public-packages>
+                <package>mox.nbevid.model</package>
+            </public-packages>
         </data>
     </configuration>
 </project>
