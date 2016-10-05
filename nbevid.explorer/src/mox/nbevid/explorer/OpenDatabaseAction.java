@@ -29,24 +29,23 @@ import org.openide.util.NbBundle.Messages;
 
 @ActionID(
         category = "File",
-        id = "mox.nbevid.explorer.NewDatabaseAction"
+        id = "mox.nbevid.explorer.OpenDatabaseAction"
 )
 @ActionRegistration(
-        iconBase = "mox/nbevid/explorer/newProject.png",
-        displayName = "#CTL_NewDatabaseAction"
+        iconBase = "mox/nbevid/explorer/openProject.png",
+        displayName = "#CTL_OpenDatabaseAction"
 )
 @ActionReferences({
-  @ActionReference(path = "Menu/File", position = 1300),
-  @ActionReference(path = "Toolbars/File", position = 300),
-  @ActionReference(path = "Shortcuts", name = "D-N")
+  @ActionReference(path = "Menu/File", position = 1350),
+  @ActionReference(path = "Toolbars/File", position = 350)
 })
-@Messages({"CTL_NewDatabaseAction=&New Database", "CTL_NewDatabaseTitle=New Database"})
-public final class NewDatabaseAction implements ActionListener {
-  @Messages({"MSG_ErrorCreatingDb=Error occured while creating database", "MSG_CreatingDb=Creating database", "CTL_CreatingDbTitle=Creating Database"})
+@Messages({"CTL_OpenDatabaseAction=&Open Database", "CTL_OpenDatabaseTitle=Open Database"})
+public final class OpenDatabaseAction implements ActionListener {
+  @Messages({"MSG_ErrorOpeningDb=Error occured while opening database", "MSG_OpeningDb=Opening database", "CTL_OpeningDbTitle=Opening Database"})
   @Override
   public void actionPerformed(ActionEvent e) {
-    final NewDatabasePanel panel = new NewDatabasePanel();
-    final DialogDescriptor dd = new DialogDescriptor(panel, Bundle.CTL_NewDatabaseTitle());
+    final OpenDatabasePanel panel = new OpenDatabasePanel();
+    final DialogDescriptor dd = new DialogDescriptor(panel, Bundle.CTL_OpenDatabaseTitle());
     panel.addChangeListener(new ChangeListener() {
       @Override
       public void stateChanged(ChangeEvent e) {
@@ -55,23 +54,22 @@ public final class NewDatabaseAction implements ActionListener {
     });
     dd.setValid(panel.validateValues());
     if (DialogDisplayer.getDefault().notify(dd).equals(DialogDescriptor.OK_OPTION)) {
-      final ProgressHandle progress = ProgressHandle.createHandle(Bundle.MSG_CreatingDb());
+      final ProgressHandle progress = ProgressHandle.createHandle(Bundle.MSG_OpeningDb());
       BaseProgressUtils.runOffEventThreadWithProgressDialog(new Runnable() {
         @Override
         public void run() {
           try {
-            SpendingsDatabase db = new SpendingsDatabase(panel.getDbName());
-            SpendingsDbPersister.getDefault().save(db, panel.getDbFolder());
+            SpendingsDatabase db = SpendingsDbPersister.getDefault().load(panel.getDbFolder());
             
             EvidPreferences.getInstance().addEvidInstance(db.getName(), panel.getDbFolder().getAbsolutePath());
           } catch (BackingStoreException | IOException ex) {
-            NotifyDescriptor.Message msg = new NotifyDescriptor.Message(Bundle.MSG_ErrorCreatingDb(), NotifyDescriptor.ERROR_MESSAGE);
+            NotifyDescriptor.Message msg = new NotifyDescriptor.Message(Bundle.MSG_ErrorOpeningDb(), NotifyDescriptor.ERROR_MESSAGE);
             DialogDisplayer.getDefault().notifyLater(msg);
             Exceptions.printStackTrace(ex);
           }
 
         }
-      }, Bundle.CTL_CreatingDbTitle(), progress, false, 200, 1000);
+      }, Bundle.CTL_OpeningDbTitle(), progress, false, 200, 1000);
     }
   }
 }

@@ -13,16 +13,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.prefs.BackingStoreException;
-import java.util.prefs.NodeChangeEvent;
-import java.util.prefs.NodeChangeListener;
-import java.util.prefs.Preferences;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import mox.nbevid.persistence.SpendingsDbPersister;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
-import org.openide.util.NbPreferences;
 
 
 /**
@@ -33,7 +31,7 @@ public class NbEvidExplorerRootNode extends AbstractNode {
   private NbEvidExplorerRootNode(Factory factory) {
     super(Children.create(factory, true));
   }
-  
+
   public static NbEvidExplorerRootNode create() {
     return new NbEvidExplorerRootNode(new Factory());
   }
@@ -52,53 +50,37 @@ public class NbEvidExplorerRootNode extends AbstractNode {
   public String getName() {
     return "Evid Explorer";
   }
-  
+
+
   private static class Factory extends ChildFactory<RootNodeKey> {
-    private final Preferences prefs;
-    
+    private final EvidPreferences prefs = EvidPreferences.getInstance();
+
     Factory() {
-      this.prefs = NbPreferences.forModule(NbEvidExplorerRootNode.class);
-      
-      this.prefs.addNodeChangeListener(new NodeChangeListener() {
+      this.prefs.addEvidInstancesChangeListener(new ChangeListener() {
         @Override
-        public void childAdded(NodeChangeEvent evt) {
-          processEvent(evt);
+        public void stateChanged(ChangeEvent e) {
+          refresh(false);
         }
-
-        @Override
-        public void childRemoved(NodeChangeEvent evt) {
-          processEvent(evt);
-        }
-
-        private void processEvent(NodeChangeEvent evt) {
-          if (evt.getChild().name().startsWith("evidInst.")) {
-            refresh(false);
-          }
-        }
-      });      
+      });
     }
-    
+
     @Override
     protected boolean createKeys(List<RootNodeKey> toPopulate) {
       ArrayList<RootNodeKey> keys = new ArrayList<>();
       try {
-        for (String child : prefs.childrenNames()) {
-          if (child.startsWith("evidInst.")) {
-            Preferences evidInstancePrefs = prefs.node(child);
-            String name = evidInstancePrefs.get("name", "");
-            String path = evidInstancePrefs.get("path", "");
-            if (!name.isEmpty() && !path.isEmpty()) {
-              keys.add(new RootNodeKey(name, new File(path)));
-            }
+        for (EvidPreferences.EvidInstance evidInst : prefs.allEvidInstances()) {
+          final File dbDirectory = new File(evidInst.getPath());
+          if (dbDirectory.exists() && dbDirectory.isDirectory() && SpendingsDbPersister.getDefault().mainDbFile(dbDirectory).exists()) {
+            keys.add(new RootNodeKey(evidInst.getName(), dbDirectory));
           }
         }
       } catch (BackingStoreException ex) {
         Exceptions.printStackTrace(ex);
       }
-      
+
       Collections.sort(keys);
       toPopulate.addAll(keys);
-      
+
       return true;
     }
 
@@ -106,12 +88,13 @@ public class NbEvidExplorerRootNode extends AbstractNode {
     protected Node createNodeForKey(RootNodeKey key) {
       return key.getRootNode();
     }
-    
+
     public void reloadRootNodes() {
       refresh(false);
     }
   }
-  
+
+
   private static class RootNodeKey implements Comparable<RootNodeKey> {
     private final String name;
     private final File dbDirectory;
@@ -155,10 +138,7 @@ public class NbEvidExplorerRootNode extends AbstractNode {
         return false;
       }
       final RootNodeKey other = (RootNodeKey) obj;
-      if (!Objects.equals(this.dbDirectory, other.dbDirectory)) {
-        return false;
-      }
-      return true;
+      return Objects.equals(this.dbDirectory, other.dbDirectory);
     }
   }
 }

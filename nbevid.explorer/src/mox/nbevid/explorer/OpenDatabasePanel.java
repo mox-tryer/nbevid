@@ -11,23 +11,22 @@ import javax.swing.JFileChooser;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import mox.nbevid.persistence.SpendingsDbPersister;
 import org.openide.util.ChangeSupport;
-import org.openide.util.NbBundle;
 
 
 /**
  *
  * @author martin
  */
-@NbBundle.Messages({"CTL_SelectFolder=Select"})
-public class NewDatabasePanel extends javax.swing.JPanel {
+public class OpenDatabasePanel extends javax.swing.JPanel {
   private static final long serialVersionUID = 1L;
   private final ChangeSupport changeSupport = new ChangeSupport(this);
   
   /**
-   * Creates new form NewDatabasePanel
+   * Creates new form OpenDatabasePanel
    */
-  public NewDatabasePanel() {
+  public OpenDatabasePanel() {
     initComponents();
     
     DocumentListener docListener = new DocumentListener() {
@@ -47,7 +46,6 @@ public class NewDatabasePanel extends javax.swing.JPanel {
       }
     };
     
-    dbNameTextField.getDocument().addDocumentListener(docListener);
     dbFolderTextField.getDocument().addDocumentListener(docListener);
   }
   
@@ -60,10 +58,6 @@ public class NewDatabasePanel extends javax.swing.JPanel {
   }
   
   public boolean validateValues() {
-    if (dbNameTextField.getText().isEmpty()) {
-      return false;
-    }
-    
     if (dbFolderTextField.getText().isEmpty()) {
       return false;
     }
@@ -72,11 +66,11 @@ public class NewDatabasePanel extends javax.swing.JPanel {
     if (!dbFolder.exists()) {
       return false;
     }
-    return dbFolder.isDirectory();
-  }
-  
-  public String getDbName() {
-    return dbNameTextField.getText();
+    if (!dbFolder.isDirectory()) {
+      return false;
+    }
+    
+    return SpendingsDbPersister.getDefault().mainDbFile(dbFolder).exists();
   }
   
   public File getDbFolder() {
@@ -91,28 +85,20 @@ public class NewDatabasePanel extends javax.swing.JPanel {
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents() {
 
-    dbNameLabel = new javax.swing.JLabel();
-    dbNameTextField = new javax.swing.JTextField();
     dbFolderLabel = new javax.swing.JLabel();
-    dbFolderChooseButton = new javax.swing.JButton();
     dbFolderTextField = new javax.swing.JTextField();
+    dbFolderChooseButton = new javax.swing.JButton();
 
-    dbNameLabel.setLabelFor(dbNameTextField);
-    org.openide.awt.Mnemonics.setLocalizedText(dbNameLabel, org.openide.util.NbBundle.getMessage(NewDatabasePanel.class, "NewDatabasePanel.dbNameLabel.text", new Object[] {})); // NOI18N
+    org.openide.awt.Mnemonics.setLocalizedText(dbFolderLabel, org.openide.util.NbBundle.getMessage(OpenDatabasePanel.class, "OpenDatabasePanel.dbFolderLabel.text", new Object[] {})); // NOI18N
 
-    dbNameTextField.setText(org.openide.util.NbBundle.getMessage(NewDatabasePanel.class, "NewDatabasePanel.dbNameTextField.text", new Object[] {})); // NOI18N
+    dbFolderTextField.setText(org.openide.util.NbBundle.getMessage(OpenDatabasePanel.class, "OpenDatabasePanel.dbFolderTextField.text", new Object[] {})); // NOI18N
 
-    dbFolderLabel.setLabelFor(dbFolderTextField);
-    org.openide.awt.Mnemonics.setLocalizedText(dbFolderLabel, org.openide.util.NbBundle.getMessage(NewDatabasePanel.class, "NewDatabasePanel.dbFolderLabel.text", new Object[] {})); // NOI18N
-
-    org.openide.awt.Mnemonics.setLocalizedText(dbFolderChooseButton, org.openide.util.NbBundle.getMessage(NewDatabasePanel.class, "NewDatabasePanel.dbFolderChooseButton.text", new Object[] {})); // NOI18N
+    org.openide.awt.Mnemonics.setLocalizedText(dbFolderChooseButton, org.openide.util.NbBundle.getMessage(OpenDatabasePanel.class, "OpenDatabasePanel.dbFolderChooseButton.text", new Object[] {})); // NOI18N
     dbFolderChooseButton.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         dbFolderChooseButtonActionPerformed(evt);
       }
     });
-
-    dbFolderTextField.setText(org.openide.util.NbBundle.getMessage(NewDatabasePanel.class, "NewDatabasePanel.dbFolderTextField.text", new Object[] {})); // NOI18N
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
@@ -120,14 +106,10 @@ public class NewDatabasePanel extends javax.swing.JPanel {
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(layout.createSequentialGroup()
         .addContainerGap()
-        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(dbFolderLabel)
-          .addComponent(dbNameLabel))
+        .addComponent(dbFolderLabel)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(dbFolderTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 293, Short.MAX_VALUE)
-          .addComponent(dbNameTextField))
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(dbFolderTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 180, Short.MAX_VALUE)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
         .addComponent(dbFolderChooseButton)
         .addContainerGap())
     );
@@ -136,13 +118,9 @@ public class NewDatabasePanel extends javax.swing.JPanel {
       .addGroup(layout.createSequentialGroup()
         .addContainerGap()
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-          .addComponent(dbNameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-          .addComponent(dbNameLabel))
-        .addGap(18, 18, 18)
-        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+          .addComponent(dbFolderLabel)
           .addComponent(dbFolderTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-          .addComponent(dbFolderChooseButton)
-          .addComponent(dbFolderLabel))
+          .addComponent(dbFolderChooseButton))
         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
     );
   }// </editor-fold>//GEN-END:initComponents
@@ -161,7 +139,5 @@ public class NewDatabasePanel extends javax.swing.JPanel {
   private javax.swing.JButton dbFolderChooseButton;
   private javax.swing.JLabel dbFolderLabel;
   private javax.swing.JTextField dbFolderTextField;
-  private javax.swing.JLabel dbNameLabel;
-  private javax.swing.JTextField dbNameTextField;
   // End of variables declaration//GEN-END:variables
 }

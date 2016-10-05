@@ -36,16 +36,20 @@ public class SpendingsDbPersister {
   public static SpendingsDbPersister getDefault() {
     return instance;
   }
+
+  public File mainDbFile(File directory) {
+    return new File(directory, "eviddb.json");
+  }
   
   public void save(SpendingsDatabase db, File directory) throws IOException {
-    File dbFile = new File(directory, "eviddb.json");
+    File dbFile = mainDbFile(directory);
     try (Writer writer = new OutputStreamWriter(new FileOutputStream(dbFile), "UTF-8")) {
       mapper.writeValue(writer, SpDbInternal.createFrom(db));
     }
   }
   
   public SpendingsDatabase load(File directory) throws IOException {
-    File dbFile = new File(directory, "eviddb.json");
+    File dbFile = mainDbFile(directory);
     try (Reader reader = new InputStreamReader(new FileInputStream(dbFile), "UTF-8")) {
       return mapper.readValue(reader, SpDbInternal.class).toExternal();
     }
