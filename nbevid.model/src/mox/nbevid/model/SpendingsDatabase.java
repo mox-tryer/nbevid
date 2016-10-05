@@ -7,7 +7,9 @@ package mox.nbevid.model;
 
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 
@@ -17,14 +19,14 @@ import java.util.Objects;
  */
 public class SpendingsDatabase {
   private final String name;
-  private final List<Item> allItems;
+  private final Map<Integer, Item> allItems;
   private final List<Year> years;
   
   public SpendingsDatabase(String name) {
-    this(name, new ArrayList<Item>(), new ArrayList<Year>());
+    this(name, new HashMap<Integer, Item>(), new ArrayList<Year>());
   }
 
-  public SpendingsDatabase(String name, List<Item> allItems, List<Year> years) {
+  public SpendingsDatabase(String name, Map<Integer, Item> allItems, List<Year> years) {
     this.name = name;
     this.allItems = allItems;
     this.years = years;
@@ -34,7 +36,7 @@ public class SpendingsDatabase {
     return name;
   }
 
-  public List<Item> getAllItems() {
+  public Map<Integer, Item> getAllItems() {
     return allItems;
   }
 

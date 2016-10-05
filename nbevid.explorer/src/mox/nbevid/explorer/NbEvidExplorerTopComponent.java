@@ -7,10 +7,13 @@ package mox.nbevid.explorer;
 
 
 import java.awt.BorderLayout;
+import javax.swing.ActionMap;
+import javax.swing.text.DefaultEditorKit;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.explorer.ExplorerManager;
+import org.openide.explorer.ExplorerUtils;
 import org.openide.explorer.view.BeanTreeView;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
@@ -55,6 +58,11 @@ public final class NbEvidExplorerTopComponent extends TopComponent implements Ex
     beanTreeView.setRootVisible(false);
     
     manager.setRootContext(NbEvidExplorerRootNode.create());
+    
+    ActionMap map = getActionMap();
+    //map.put(DefaultEditorKit.copyAction, ExplorerUtils.actionCopy(manager));
+    //map.put("delete", ExplorerUtils.actionDelete(manager, true));
+    associateLookup(ExplorerUtils.createLookup(manager, map));
   }
 
   /**

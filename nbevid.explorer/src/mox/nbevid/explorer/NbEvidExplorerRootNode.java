@@ -6,6 +6,7 @@
 package mox.nbevid.explorer;
 
 
+import mox.nbevid.explorer.nodes.DatabaseNode;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;

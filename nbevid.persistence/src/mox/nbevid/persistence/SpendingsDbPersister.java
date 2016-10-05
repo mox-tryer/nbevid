@@ -18,6 +18,7 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import mox.nbevid.model.SpendingsDatabase;
+import mox.nbevid.persistence.model.SpendingsDatabaseExt;
 
 
 /**
@@ -42,39 +43,14 @@ public class SpendingsDbPersister {
   }
   
   public void save(SpendingsDatabase db, File directory) throws IOException {
-    File dbFile = mainDbFile(directory);
-    try (Writer writer = new OutputStreamWriter(new FileOutputStream(dbFile), "UTF-8")) {
-      mapper.writeValue(writer, SpDbInternal.createFrom(db));
+    try (Writer writer = new OutputStreamWriter(new FileOutputStream(mainDbFile(directory)), "UTF-8")) {
+      mapper.writeValue(writer, SpendingsDatabaseExt.createFromModel(db));
     }
   }
   
   public SpendingsDatabase load(File directory) throws IOException {
-    File dbFile = mainDbFile(directory);
-    try (Reader reader = new InputStreamReader(new FileInputStream(dbFile), "UTF-8")) {
-      return mapper.readValue(reader, SpDbInternal.class).toExternal();
-    }
-  }
-  
-  public static final class SpDbInternal {
-    private String name;
-    
-    private static SpDbInternal createFrom(SpendingsDatabase db) {
-      SpDbInternal dbi = new SpDbInternal();
-      dbi.setName(db.getName());
-      return dbi;
-    }
-
-    public String getName() {
-      return name;
-    }
-
-    public void setName(String name) {
-      this.name = name;
-    }
-    
-    public SpendingsDatabase toExternal() {
-      SpendingsDatabase db = new SpendingsDatabase(name);
-      return db;
+    try (Reader reader = new InputStreamReader(new FileInputStream(mainDbFile(directory)), "UTF-8")) {
+      return mapper.readValue(reader, SpendingsDatabaseExt.class).toModel();
     }
   }
 }
