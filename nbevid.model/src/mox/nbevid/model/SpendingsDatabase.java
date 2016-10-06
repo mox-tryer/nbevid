@@ -43,6 +43,10 @@ public class SpendingsDatabase {
   public List<Year> getYears() {
     return years;
   }
+  
+  public void addItem(Item item) {
+    allItems.put(item.getItemId(), item);
+  }
 
   @Override
   public int hashCode() {

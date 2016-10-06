@@ -7,18 +7,34 @@ package mox.nbevid.explorer.editors;
 
 
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JToolBar;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.table.AbstractTableModel;
+import mox.nbevid.explorer.NbEvidExplorerTopComponent;
 import mox.nbevid.explorer.nodes.DbInfo;
+import mox.nbevid.model.Item;
+import mox.nbevid.model.ItemType;
 import mox.nbevid.model.SpendingsDatabase;
 import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewDescription;
 import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;
+import org.netbeans.swing.etable.ETable;
+import org.openide.DialogDescriptor;
+import org.openide.DialogDisplayer;
 import org.openide.awt.UndoRedo;
 import org.openide.util.HelpCtx;
+import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
+import org.openide.util.NbBundle;
 import org.openide.util.lookup.Lookups;
 import org.openide.windows.TopComponent;
 
@@ -29,14 +45,19 @@ import org.openide.windows.TopComponent;
  */
 public class DbItemsEditorPanel extends javax.swing.JPanel implements MultiViewElement {
   private static final long serialVersionUID = 1L;
-  
+
   private MultiViewElementCallback callback;
 
   private final JToolBar toolbar = new JToolBar();
-  
+
   private final SpendingsDatabase db;
   private final DbInfo dbInfo;
   private final Lookup lookup;
+
+  private final DataTable table;
+  private final ItemsTableModel tableModel;
+
+  private final AddItemAction addItemAction = new AddItemAction();
 
   /**
    * Creates new form DbItemsEditorPanel
@@ -45,8 +66,24 @@ public class DbItemsEditorPanel extends javax.swing.JPanel implements MultiViewE
     this.db = db;
     this.dbInfo = dbInfo;
     this.lookup = Lookups.fixed(db, dbInfo);
-    
+
     initComponents();
+
+    toolbar.add(addItemAction);
+
+    tableModel = new ItemsTableModel(db, dbInfo);
+    table = new DataTable(tableModel);
+    initTable();
+    itemsTableScrollPane.setViewportView(table);
+  }
+
+  private void initTable() {
+    table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    table.setAutoResizeMode(DataTable.AUTO_RESIZE_OFF);
+    table.setCellSelectionEnabled(true);
+    table.setColumnSelectionOn(MouseEvent.BUTTON3, ETable.ColumnSelection.NO_SELECTION);
+
+    table.adjustColumns();
   }
 
   /**
@@ -57,15 +94,23 @@ public class DbItemsEditorPanel extends javax.swing.JPanel implements MultiViewE
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents() {
 
+    itemsTableScrollPane = new javax.swing.JScrollPane();
+
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
     layout.setHorizontalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 400, Short.MAX_VALUE)
+      .addGroup(layout.createSequentialGroup()
+        .addContainerGap()
+        .addComponent(itemsTableScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 376, Short.MAX_VALUE)
+        .addContainerGap())
     );
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 300, Short.MAX_VALUE)
+      .addGroup(layout.createSequentialGroup()
+        .addContainerGap()
+        .addComponent(itemsTableScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 276, Short.MAX_VALUE)
+        .addContainerGap())
     );
   }// </editor-fold>//GEN-END:initComponents
 
@@ -130,6 +175,7 @@ public class DbItemsEditorPanel extends javax.swing.JPanel implements MultiViewE
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JScrollPane itemsTableScrollPane;
   // End of variables declaration//GEN-END:variables
 
   public static final class Description implements MultiViewDescription, java.io.Serializable {
@@ -143,7 +189,7 @@ public class DbItemsEditorPanel extends javax.swing.JPanel implements MultiViewE
       this.db = db;
       this.dbInfo = dbInfo;
     }
-    
+
     @Override
     public int getPersistenceType() {
       return TopComponent.PERSISTENCE_NEVER;
@@ -172,6 +218,130 @@ public class DbItemsEditorPanel extends javax.swing.JPanel implements MultiViewE
     @Override
     public MultiViewElement createElement() {
       return new DbItemsEditorPanel(db, dbInfo);
+    }
+  }
+
+
+  @NbBundle.Messages({"COL_ItemId=Id", "COL_ItemName=Name", "COL_ItemType=Type"})
+  private class ItemsTableModel extends AbstractTableModel {
+    private static final long serialVersionUID = 1L;
+
+    private final SpendingsDatabase db;
+    private final DbInfo dbInfo;
+    private final ArrayList<Integer> index = new ArrayList<>();
+
+    public ItemsTableModel(SpendingsDatabase db, DbInfo dbInfo) {
+      this.db = db;
+      this.dbInfo = dbInfo;
+
+      index.addAll(db.getAllItems().keySet());
+      index.sort(null);
+    }
+
+    @Override
+    public int getRowCount() {
+      return index.size();
+    }
+
+    @Override
+    public int getColumnCount() {
+      return 3;
+    }
+
+    @Override
+    public String getColumnName(int columnIndex) {
+      switch (columnIndex) {
+        case 0:
+          return Bundle.COL_ItemId();
+        case 1:
+          return Bundle.COL_ItemName();
+        case 2:
+          return Bundle.COL_ItemType();
+        default:
+          return "???";
+      }
+    }
+
+    @Override
+    public Class<?> getColumnClass(int columnIndex) {
+      switch (columnIndex) {
+        case 0:
+          return Integer.class;
+        default:
+          return String.class;
+      }
+    }
+
+    @Override
+    public Object getValueAt(int rowIndex, int columnIndex) {
+      Item item = db.getAllItems().get(index.get(rowIndex));
+
+      switch (columnIndex) {
+        case 0:
+          return item.getItemId();
+        case 1:
+          return item.getItemName();
+        case 2:
+          return NbBundle.getMessage(NbEvidExplorerTopComponent.class, "LBL_ItemType_" + item.getItemType().name());
+        default:
+          return "???";
+      }
+    }
+
+    @Override
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+      Item item = db.getAllItems().get(index.get(rowIndex));
+
+      if ((columnIndex == 1) && (aValue instanceof String)) {
+        item.setItemName((String) aValue);
+        dbInfo.dbChanged();
+      }
+    }
+
+    @Override
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+      // len nazov
+      return columnIndex == 1;
+    }
+
+    private void addItem(String itemName, ItemType itemType) {
+      // spolieham sa na zosortovany index
+      final int lastItemId = index.isEmpty() ? 0 : index.get(index.size() - 1);
+      int newItemId = lastItemId + 1;
+      
+      Item newItem = new Item(newItemId, itemName, itemType);
+      db.addItem(newItem);
+      index.add(newItemId);
+      fireTableRowsInserted(index.size() - 1, index.size() - 1);
+      dbInfo.dbChanged();
+    }
+  }
+
+
+  @NbBundle.Messages({"LBL_AddItemAction=Add Item", "LBL_AddItemTitle=New Item"})
+  private class AddItemAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
+
+    @SuppressWarnings("OverridableMethodCallInConstructor")
+    public AddItemAction() {
+      super(null, ImageUtilities.loadImageIcon("mox/nbevid/explorer/resources/add.png", false));
+      putValue(SHORT_DESCRIPTION, Bundle.LBL_AddItemAction());
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      final NewItemPanel panel = new NewItemPanel();
+      final DialogDescriptor dd = new DialogDescriptor(panel, Bundle.LBL_AddItemTitle());
+      panel.addChangeListener(new ChangeListener() {
+        @Override
+        public void stateChanged(ChangeEvent e) {
+          dd.setValid(panel.validateValues());
+        }
+      });
+      dd.setValid(panel.validateValues());
+      if (DialogDisplayer.getDefault().notify(dd).equals(DialogDescriptor.OK_OPTION)) {
+        tableModel.addItem(panel.getItemName(), panel.getItemType());
+      }
     }
   }
 }

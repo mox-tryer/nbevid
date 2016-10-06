@@ -12,7 +12,7 @@ package mox.nbevid.model;
  */
 public class Item {
   private final int itemId;
-  private final String itemName;
+  private String itemName;
   private final ItemType itemType;
 
   public Item(int itemId, String itemName, ItemType itemType) {
@@ -27,6 +27,10 @@ public class Item {
 
   public String getItemName() {
     return itemName;
+  }
+
+  public void setItemName(String itemName) {
+    this.itemName = itemName;
   }
 
   public ItemType getItemType() {

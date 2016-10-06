@@ -38,7 +38,7 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
   public DatabaseNode(String name, File dbDirectory, SpendingsDatabase db) {
     // TODO: tu uz by mala prist nacitana SpendingsDatabase (zatial bez rokov)
     //super(Children.create(factory, true));
-    super(Children.LEAF, Lookups.fixed(db, new DbInfo(dbDirectory)));
+    super(Children.LEAF, Lookups.fixed(db, new DbInfo(db, dbDirectory)));
     this.name = name;
     this.dbDirectory = dbDirectory;
     this.db = db;
