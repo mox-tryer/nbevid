@@ -41,7 +41,8 @@ import org.openide.util.NbBundle.Messages;
 })
 @Messages({"CTL_OpenDatabaseAction=&Open Database", "CTL_OpenDatabaseTitle=Open Database"})
 public final class OpenDatabaseAction implements ActionListener {
-  @Messages({"MSG_ErrorOpeningDb=Error occured while opening database", "MSG_OpeningDb=Opening database", "CTL_OpeningDbTitle=Opening Database"})
+  @Messages({"MSG_ErrorOpeningDb=Error occured while opening database", "MSG_OpeningDb=Opening database", "CTL_OpeningDbTitle=Opening Database",
+    "MSG_AlreadyOpened=Database is already opened"})
   @Override
   public void actionPerformed(ActionEvent e) {
     final OpenDatabasePanel panel = new OpenDatabasePanel();
@@ -59,9 +60,14 @@ public final class OpenDatabaseAction implements ActionListener {
         @Override
         public void run() {
           try {
+            if (EvidPreferences.getInstance().hasEvidInstance(panel.getDbFolder().getCanonicalPath())) {
+              DialogDisplayer.getDefault().notifyLater(new NotifyDescriptor.Message(Bundle.MSG_AlreadyOpened(), NotifyDescriptor.Message.ERROR_MESSAGE));
+              return;
+            }
+            
             SpendingsDatabase db = SpendingsDbPersister.getDefault().load(panel.getDbFolder());
             
-            EvidPreferences.getInstance().addEvidInstance(db.getName(), panel.getDbFolder().getAbsolutePath());
+            EvidPreferences.getInstance().addEvidInstance(db.getName(), panel.getDbFolder().getCanonicalPath());
           } catch (BackingStoreException | IOException ex) {
             NotifyDescriptor.Message msg = new NotifyDescriptor.Message(Bundle.MSG_ErrorOpeningDb(), NotifyDescriptor.ERROR_MESSAGE);
             DialogDisplayer.getDefault().notifyLater(msg);

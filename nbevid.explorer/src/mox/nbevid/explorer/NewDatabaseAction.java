@@ -63,7 +63,7 @@ public final class NewDatabaseAction implements ActionListener {
             SpendingsDatabase db = new SpendingsDatabase(panel.getDbName());
             SpendingsDbPersister.getDefault().save(db, panel.getDbFolder());
             
-            EvidPreferences.getInstance().addEvidInstance(db.getName(), panel.getDbFolder().getAbsolutePath());
+            EvidPreferences.getInstance().addEvidInstance(db.getName(), panel.getDbFolder().getCanonicalPath());
           } catch (BackingStoreException | IOException ex) {
             NotifyDescriptor.Message msg = new NotifyDescriptor.Message(Bundle.MSG_ErrorCreatingDb(), NotifyDescriptor.ERROR_MESSAGE);
             DialogDisplayer.getDefault().notifyLater(msg);

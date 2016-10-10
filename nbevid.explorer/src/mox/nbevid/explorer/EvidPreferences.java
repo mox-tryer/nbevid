@@ -8,6 +8,7 @@ package mox.nbevid.explorer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.NodeChangeEvent;
 import java.util.prefs.NodeChangeListener;
@@ -93,6 +94,16 @@ public class EvidPreferences {
     evidInstancePrefs.flush();
     prefs.flush();
   }
+  
+  public boolean hasEvidInstance(String path) throws BackingStoreException {
+    for (EvidInstance evidInst : allEvidInstances()) {
+      if (Objects.equals(evidInst.getPath(), path)) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
 
 
   public static final class EvidInstance {
@@ -137,10 +148,7 @@ public class EvidPreferences {
         return false;
       }
       final EvidInstance other = (EvidInstance) obj;
-      if (this.id != other.id) {
-        return false;
-      }
-      return true;
+      return this.id == other.id;
     }
   }
 }
