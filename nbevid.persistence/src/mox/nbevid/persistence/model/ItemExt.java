@@ -18,12 +18,14 @@ public class ItemExt implements Comparable<ItemExt> {
   private int itemId;
   private String itemName;
   private ItemType itemType;
+  private int yearUsageCount;
 
   static ItemExt createFromModel(Item item) {
     ItemExt tmp = new ItemExt();
     tmp.setItemId(item.getItemId());
     tmp.setItemName(item.getItemName());
     tmp.setItemType(item.getItemType());
+    tmp.setYearUsageCount(item.getYearUsageCount());
     
     return tmp;
   }
@@ -52,12 +54,20 @@ public class ItemExt implements Comparable<ItemExt> {
     this.itemType = itemType;
   }
 
+  public int getYearUsageCount() {
+    return yearUsageCount;
+  }
+
+  public void setYearUsageCount(int yearUsageCount) {
+    this.yearUsageCount = yearUsageCount;
+  }
+
   @Override
   public int compareTo(ItemExt o) {
     return Integer.compare(this.itemId, o.itemId);
   }
 
   Item toModel() {
-    return new Item(itemId, itemName, itemType);
+    return new Item(itemId, itemName, itemType, yearUsageCount);
   }
 }

@@ -47,6 +47,10 @@ public class SpendingsDatabase {
   public void addItem(Item item) {
     allItems.put(item.getItemId(), item);
   }
+  
+  public void removeItem(Item item) {
+    allItems.remove(item.getItemId());
+  }
 
   @Override
   public int hashCode() {

@@ -6,6 +6,8 @@
 package mox.nbevid.persistence;
 
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.File;
@@ -31,7 +33,10 @@ public class SpendingsDbPersister {
   private final ObjectMapper mapper;
   
   private SpendingsDbPersister() {
-    this.mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
+    this.mapper = new ObjectMapper()
+            .enable(SerializationFeature.INDENT_OUTPUT)
+            .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+            .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
   }
   
   public static SpendingsDbPersister getDefault() {

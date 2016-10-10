@@ -14,11 +14,19 @@ public class Item {
   private final int itemId;
   private String itemName;
   private final ItemType itemType;
+  private int yearUsageCount;
 
   public Item(int itemId, String itemName, ItemType itemType) {
     this.itemId = itemId;
     this.itemName = itemName;
     this.itemType = itemType;
+  }
+
+  public Item(int itemId, String itemName, ItemType itemType, int yearUsageCount) {
+    this.itemId = itemId;
+    this.itemName = itemName;
+    this.itemType = itemType;
+    this.yearUsageCount = yearUsageCount;
   }
 
   public int getItemId() {
@@ -35,6 +43,22 @@ public class Item {
 
   public ItemType getItemType() {
     return itemType;
+  }
+
+  public int getYearUsageCount() {
+    return yearUsageCount;
+  }
+
+  public void setYearUsageCount(int yearUsageCount) {
+    this.yearUsageCount = yearUsageCount;
+  }
+  
+  public void incYearUsageCount() {
+    yearUsageCount++;
+  }
+  
+  public void decYearUsageCount() {
+    yearUsageCount--;
   }
 
   @Override

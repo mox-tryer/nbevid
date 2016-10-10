@@ -10,13 +10,17 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Objects;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import static javax.swing.Action.SHORT_DESCRIPTION;
 import javax.swing.JComponent;
 import javax.swing.JToolBar;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import mox.nbevid.explorer.NbEvidExplorerTopComponent;
 import mox.nbevid.explorer.nodes.DbInfo;
@@ -30,6 +34,7 @@ import org.netbeans.core.spi.multiview.MultiViewElementCallback;
 import org.netbeans.swing.etable.ETable;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
+import org.openide.NotifyDescriptor;
 import org.openide.awt.UndoRedo;
 import org.openide.util.HelpCtx;
 import org.openide.util.ImageUtilities;
@@ -58,6 +63,7 @@ public class DbItemsEditorPanel extends javax.swing.JPanel implements MultiViewE
   private final ItemsTableModel tableModel;
 
   private final AddItemAction addItemAction = new AddItemAction();
+  private final RemoveItemAction removeItemAction = new RemoveItemAction();
 
   /**
    * Creates new form DbItemsEditorPanel
@@ -69,7 +75,9 @@ public class DbItemsEditorPanel extends javax.swing.JPanel implements MultiViewE
 
     initComponents();
 
+    toolbar.addSeparator();
     toolbar.add(addItemAction);
+    toolbar.add(removeItemAction);
 
     tableModel = new ItemsTableModel(db, dbInfo);
     table = new DataTable(tableModel);
@@ -80,10 +88,19 @@ public class DbItemsEditorPanel extends javax.swing.JPanel implements MultiViewE
   private void initTable() {
     table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     table.setAutoResizeMode(DataTable.AUTO_RESIZE_OFF);
-    table.setCellSelectionEnabled(true);
+    table.setCellSelectionEnabled(false);
     table.setColumnSelectionOn(MouseEvent.BUTTON3, ETable.ColumnSelection.NO_SELECTION);
 
     table.adjustColumns();
+
+    table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+      @Override
+      public void valueChanged(ListSelectionEvent e) {
+        int index = e.getFirstIndex();
+        Item item = (index < 0) ? null : tableModel.getItem(index);
+        removeItemAction.checkItem(item);
+      }
+    });
   }
 
   /**
@@ -274,7 +291,7 @@ public class DbItemsEditorPanel extends javax.swing.JPanel implements MultiViewE
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-      Item item = db.getAllItems().get(index.get(rowIndex));
+      Item item = getItem(rowIndex);
 
       switch (columnIndex) {
         case 0:
@@ -288,13 +305,21 @@ public class DbItemsEditorPanel extends javax.swing.JPanel implements MultiViewE
       }
     }
 
+    public Item getItem(int rowIndex) {
+      return db.getAllItems().get(index.get(rowIndex));
+    }
+
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-      Item item = db.getAllItems().get(index.get(rowIndex));
+      Item item = getItem(rowIndex);
 
       if ((columnIndex == 1) && (aValue instanceof String)) {
-        item.setItemName((String) aValue);
-        dbInfo.dbChanged();
+        String oldValue = item.getItemName();
+        String newValue = (String) aValue;
+        item.setItemName(newValue);
+        if (!Objects.equals(oldValue, newValue)) {
+          dbInfo.dbChanged();
+        }
       }
     }
 
@@ -308,12 +333,32 @@ public class DbItemsEditorPanel extends javax.swing.JPanel implements MultiViewE
       // spolieham sa na zosortovany index
       final int lastItemId = index.isEmpty() ? 0 : index.get(index.size() - 1);
       int newItemId = lastItemId + 1;
-      
+
       Item newItem = new Item(newItemId, itemName, itemType);
       db.addItem(newItem);
       index.add(newItemId);
+      // nie je potrebne sortovat, nakolko novy item ma najvacsi ID a je pridany na koniec
       fireTableRowsInserted(index.size() - 1, index.size() - 1);
       dbInfo.dbChanged();
+    }
+    
+    private void removeItem(Item item) {
+      // najst index
+      int itemIndex = -1;
+      for (int i = 0; i < index.size(); i++) {
+        int id = index.get(i);
+        if (id == item.getItemId()) {
+          itemIndex = i;
+          break;
+        }
+      }
+      
+      if (itemIndex >= 0) {
+        db.removeItem(item);
+        index.remove(itemIndex);
+        fireTableRowsDeleted(itemIndex, itemIndex);
+        dbInfo.dbChanged();
+      }
     }
   }
 
@@ -341,6 +386,49 @@ public class DbItemsEditorPanel extends javax.swing.JPanel implements MultiViewE
       dd.setValid(panel.validateValues());
       if (DialogDisplayer.getDefault().notify(dd).equals(DialogDescriptor.OK_OPTION)) {
         tableModel.addItem(panel.getItemName(), panel.getItemType());
+      }
+    }
+  }
+
+
+  @NbBundle.Messages({
+    "LBL_RemoveItemAction=Remove Item",
+    "LBL_RemoveItemTitle=Remove Item",
+    "# {0} - item name",
+    "LBL_RemoveConfirmation=Do you want to remove item {0}?"
+  })
+  private class RemoveItemAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
+
+    @SuppressWarnings("OverridableMethodCallInConstructor")
+    public RemoveItemAction() {
+      super(null, ImageUtilities.loadImageIcon("mox/nbevid/explorer/resources/remove.png", false));
+      putValue(SHORT_DESCRIPTION, Bundle.LBL_RemoveItemAction());
+      setEnabled(false);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      int selectedRow = table.getSelectedRow();
+      if (selectedRow < 0) {
+        return;
+      }
+      Item selectedItem = tableModel.getItem(selectedRow);
+      if (selectedItem == null) {
+        return;
+      }
+      final NotifyDescriptor nd = new NotifyDescriptor.Confirmation(Bundle.LBL_RemoveConfirmation(selectedItem.getItemName()), Bundle.LBL_RemoveItemTitle(),
+              NotifyDescriptor.Confirmation.YES_NO_OPTION);
+      if (DialogDisplayer.getDefault().notify(nd) == NotifyDescriptor.YES_OPTION) {
+        tableModel.removeItem(selectedItem);
+      }
+    }
+
+    private void checkItem(Item item) {
+      if (item == null) {
+        setEnabled(false);
+      } else {
+        setEnabled(item.getYearUsageCount() == 0);
       }
     }
   }
