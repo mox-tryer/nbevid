@@ -98,7 +98,7 @@ public class SpendingsDatabaseExt {
     }
     db.setLastYearItemIds(lastYearItems);
     for (YearInfoExt ext : yearInfos) {
-      db.addYearInfo(ext.toModel());
+      db.addYearInfo(ext.toModel(db));
     }
     return db;
   }

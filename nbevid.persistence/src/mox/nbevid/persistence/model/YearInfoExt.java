@@ -6,6 +6,7 @@
 package mox.nbevid.persistence.model;
 
 
+import mox.nbevid.model.SpendingsDatabase;
 import mox.nbevid.model.YearInfo;
 
 
@@ -58,7 +59,7 @@ public class YearInfoExt implements Comparable<YearInfoExt> {
     return Integer.compare(this.year, o.year);
   }
   
-  YearInfo toModel() {
-    return new YearInfo(year);
+  YearInfo toModel(SpendingsDatabase db) {
+    return new YearInfo(db, year);
   }
 }

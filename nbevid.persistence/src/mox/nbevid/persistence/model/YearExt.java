@@ -25,7 +25,7 @@ public class YearExt implements Comparable<YearExt> {
   private List<Integer> yearItems = new ArrayList<>();
   private List<YearMonthExt> months = new ArrayList<>();
   
-  static YearExt createFromModel(Year year) {
+  public static YearExt createFromModel(Year year) {
     YearExt tmp = new YearExt();
     tmp.setYear(year.getYear());
     tmp.setYearItems(createYearItemsListExt(year.getYearItems()));
