@@ -20,6 +20,7 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import mox.nbevid.model.SpendingsDatabase;
+import mox.nbevid.model.Year;
 import mox.nbevid.persistence.model.SpendingsDatabaseExt;
 
 
@@ -47,10 +48,16 @@ public class SpendingsDbPersister {
     return new File(directory, "eviddb.json");
   }
   
+  public File yearDbFile(File directory, Year year) {
+    return new File(directory, String.format("year%04d.json", year.getYear()));
+  }
+  
   public void save(SpendingsDatabase db, File directory) throws IOException {
     try (Writer writer = new OutputStreamWriter(new FileOutputStream(mainDbFile(directory)), "UTF-8")) {
       mapper.writeValue(writer, SpendingsDatabaseExt.createFromModel(db));
     }
+    
+    // TODO: save years
   }
   
   public SpendingsDatabase load(File directory) throws IOException {
