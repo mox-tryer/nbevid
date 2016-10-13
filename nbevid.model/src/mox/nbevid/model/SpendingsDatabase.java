@@ -19,17 +19,13 @@ import java.util.Objects;
  */
 public class SpendingsDatabase {
   private final String name;
-  private final Map<Integer, Item> allItems;
-  private final List<Year> years;
+  private final Map<Integer, Item> allItems = new HashMap<>();
+  private final List<Item> lastYearItems = new ArrayList<>();
+  private final List<YearInfo> yearInfos = new ArrayList<>();
+  private final Map<Integer, Year> years = new HashMap<>();
   
   public SpendingsDatabase(String name) {
-    this(name, new HashMap<Integer, Item>(), new ArrayList<Year>());
-  }
-
-  public SpendingsDatabase(String name, Map<Integer, Item> allItems, List<Year> years) {
     this.name = name;
-    this.allItems = allItems;
-    this.years = years;
   }
 
   public String getName() {
@@ -39,10 +35,6 @@ public class SpendingsDatabase {
   public Map<Integer, Item> getAllItems() {
     return allItems;
   }
-
-  public List<Year> getYears() {
-    return years;
-  }
   
   public void addItem(Item item) {
     allItems.put(item.getItemId(), item);
@@ -50,6 +42,34 @@ public class SpendingsDatabase {
   
   public void removeItem(Item item) {
     allItems.remove(item.getItemId());
+  }
+  
+  public Item getItem(int itemId) {
+    return allItems.get(itemId);
+  }
+
+  public List<Item> getLastYearItems() {
+    return lastYearItems;
+  }
+  
+  public void setLastYearItemIds(List<Integer> itemIds) {
+    lastYearItems.clear();
+    for (Integer itemId : itemIds) {
+      lastYearItems.add(getItem(itemId));
+    }
+  }
+
+  public List<YearInfo> getYearInfos() {
+    return yearInfos;
+  }
+  
+  public void addYearInfo(YearInfo yearInfo) {
+    this.yearInfos.add(yearInfo);
+    this.yearInfos.sort(null);
+  }
+
+  public Map<Integer, Year> getYears() {
+    return years;
   }
 
   @Override
