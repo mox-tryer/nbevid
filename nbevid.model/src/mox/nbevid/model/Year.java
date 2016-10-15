@@ -24,9 +24,18 @@ public class Year {
   private final Map<Month, YearMonth> months = new HashMap<>();
 
   public Year(SpendingsDatabase db, int year) {
+    this(db, year, null);
+  }
+
+  public Year(SpendingsDatabase db, int year, List<Item> yearItems) {
     this.db = db;
     this.year = year;
-    
+
+    this.yearItems.clear();
+    if (yearItems != null) {
+      this.yearItems.addAll(yearItems);
+    }
+
     months.clear();
     for (Month month : Month.values()) {
       months.put(month, new YearMonth(this, month));
@@ -44,7 +53,7 @@ public class Year {
   public List<Item> getYearItems() {
     return yearItems;
   }
-  
+
   public void setYearItemIds(List<Integer> itemIds) {
     yearItems.clear();
     for (Integer itemId : itemIds) {
@@ -55,7 +64,7 @@ public class Year {
   public Map<Month, YearMonth> getMonths() {
     return months;
   }
-  
+
   public void setMonths(List<YearMonth> months) {
     this.months.clear();
     for (YearMonth month : months) {
@@ -92,5 +101,9 @@ public class Year {
   @Override
   public String toString() {
     return "Year{" + "year=" + year + '}';
+  }
+
+  YearInfo createYearInfo() {
+    return new YearInfo(db, year);
   }
 }

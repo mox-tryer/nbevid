@@ -47,29 +47,22 @@ public final class NewDatabaseAction implements ActionListener {
   public void actionPerformed(ActionEvent e) {
     final NewDatabasePanel panel = new NewDatabasePanel();
     final DialogDescriptor dd = new DialogDescriptor(panel, Bundle.CTL_NewDatabaseTitle());
-    panel.addChangeListener(new ChangeListener() {
-      @Override
-      public void stateChanged(ChangeEvent e) {
-        dd.setValid(panel.validateValues());
-      }
+    panel.addChangeListener((ChangeEvent e1) -> {
+      dd.setValid(panel.validateValues());
     });
     dd.setValid(panel.validateValues());
     if (DialogDisplayer.getDefault().notify(dd).equals(DialogDescriptor.OK_OPTION)) {
       final ProgressHandle progress = ProgressHandle.createHandle(Bundle.MSG_CreatingDb());
-      BaseProgressUtils.runOffEventThreadWithProgressDialog(new Runnable() {
-        @Override
-        public void run() {
-          try {
-            SpendingsDatabase db = new SpendingsDatabase(panel.getDbName());
-            SpendingsDbPersister.getDefault().save(db, panel.getDbFolder());
-            
-            EvidPreferences.getInstance().addEvidInstance(db.getName(), panel.getDbFolder().getCanonicalPath());
-          } catch (BackingStoreException | IOException ex) {
-            NotifyDescriptor.Message msg = new NotifyDescriptor.Message(Bundle.MSG_ErrorCreatingDb(), NotifyDescriptor.ERROR_MESSAGE);
-            DialogDisplayer.getDefault().notifyLater(msg);
-            Exceptions.printStackTrace(ex);
-          }
-
+      BaseProgressUtils.runOffEventThreadWithProgressDialog(() -> {
+        try {
+          SpendingsDatabase db = new SpendingsDatabase(panel.getDbName());
+          SpendingsDbPersister.getDefault().save(db, panel.getDbFolder());
+          
+          EvidPreferences.getInstance().addEvidInstance(db.getName(), panel.getDbFolder().getCanonicalPath());
+        } catch (BackingStoreException | IOException ex) {
+          NotifyDescriptor.Message msg = new NotifyDescriptor.Message(Bundle.MSG_ErrorCreatingDb(), NotifyDescriptor.ERROR_MESSAGE);
+          DialogDisplayer.getDefault().notifyLater(msg);
+          Exceptions.printStackTrace(ex);
         }
       }, Bundle.CTL_CreatingDbTitle(), progress, false, 200, 1000);
     }

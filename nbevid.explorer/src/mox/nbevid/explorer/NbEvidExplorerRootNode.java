@@ -57,11 +57,8 @@ public class NbEvidExplorerRootNode extends AbstractNode {
     private final EvidPreferences prefs = EvidPreferences.getInstance();
 
     Factory() {
-      this.prefs.addEvidInstancesChangeListener(new ChangeListener() {
-        @Override
-        public void stateChanged(ChangeEvent e) {
-          refresh(false);
-        }
+      this.prefs.addEvidInstancesChangeListener((ChangeEvent e) -> {
+        refresh(false);
       });
     }
 

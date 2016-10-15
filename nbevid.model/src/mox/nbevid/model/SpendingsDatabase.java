@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import javax.swing.event.ChangeListener;
+import org.openide.util.ChangeSupport;
 
 
 /**
@@ -23,6 +25,8 @@ public class SpendingsDatabase {
   private final List<Item> lastYearItems = new ArrayList<>();
   private final List<YearInfo> yearInfos = new ArrayList<>();
   private final Map<Integer, Year> years = new HashMap<>();
+  
+  private final ChangeSupport yearsChangeSupport = new ChangeSupport(this);
   
   public SpendingsDatabase(String name) {
     this.name = name;
@@ -70,6 +74,28 @@ public class SpendingsDatabase {
 
   public Map<Integer, Year> getYears() {
     return years;
+  }
+  
+  public void addYear(Year year) {
+    if (years.containsKey(year.getYear())) {
+      // TODO: throw exception
+      return;
+    }
+    
+    years.put(year.getYear(), year);
+    addYearInfo(year.createYearInfo());
+    lastYearItems.clear();
+    lastYearItems.addAll(year.getYearItems());
+    
+    yearsChangeSupport.fireChange();
+  }
+  
+  public void addYearsChangeListener(ChangeListener listener) {
+    yearsChangeSupport.addChangeListener(listener);
+  }
+  
+  public void removeYearsChangeListener(ChangeListener listener) {
+    yearsChangeSupport.removeChangeListener(listener);
   }
 
   @Override
