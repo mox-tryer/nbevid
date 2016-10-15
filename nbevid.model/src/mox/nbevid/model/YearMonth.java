@@ -17,21 +17,16 @@ import java.util.Objects;
  * @author martin
  */
 public class YearMonth {
-  private final int year;
+  private final Year year;
   private final Month month;
-  private final Map<Item, BigDecimal> values;
+  private final Map<Item, BigDecimal> values = new HashMap<>();
   
-  public YearMonth(int year, Month month) {
-    this(year, month, new HashMap<Item, BigDecimal>());
-  }
-
-  public YearMonth(int year, Month month, Map<Item, BigDecimal> values) {
+  public YearMonth(Year year, Month month) {
     this.year = year;
     this.month = month;
-    this.values = values;
   }
 
-  public int getYear() {
+  public Year getYear() {
     return year;
   }
 
@@ -42,12 +37,19 @@ public class YearMonth {
   public Map<Item, BigDecimal> getValues() {
     return values;
   }
+  
+  public void setValuesByIds(Map<Integer, BigDecimal> values) {
+    this.values.clear();
+    for (Map.Entry<Integer, BigDecimal> entry : values.entrySet()) {
+      this.values.put(year.getDb().getItem(entry.getKey()), entry.getValue());
+    }
+  }
 
   @Override
   public int hashCode() {
-    int hash = 5;
-    hash = 79 * hash + this.year;
-    hash = 79 * hash + Objects.hashCode(this.month);
+    int hash = 3;
+    hash = 71 * hash + Objects.hashCode(this.year);
+    hash = 71 * hash + Objects.hashCode(this.month);
     return hash;
   }
 
@@ -63,7 +65,7 @@ public class YearMonth {
       return false;
     }
     final YearMonth other = (YearMonth) obj;
-    if (this.year != other.year) {
+    if (!Objects.equals(this.year, other.year)) {
       return false;
     }
     return this.month == other.month;

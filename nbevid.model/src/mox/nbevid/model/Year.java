@@ -6,7 +6,11 @@
 package mox.nbevid.model;
 
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 
 /**
@@ -14,26 +18,65 @@ import java.util.Map;
  * @author martin
  */
 public class Year {
+  private final SpendingsDatabase db;
   private final int year;
-  private final Map<Month, YearMonth> months;
+  private final List<Item> yearItems = new ArrayList<>();
+  private final Map<Month, YearMonth> months = new HashMap<>();
 
-  public Year(int year, Map<Month, YearMonth> months) {
+  public Year(SpendingsDatabase db, int year) {
+    this(db, year, null);
+  }
+
+  public Year(SpendingsDatabase db, int year, List<Item> yearItems) {
+    this.db = db;
     this.year = year;
-    this.months = months;
+
+    this.yearItems.clear();
+    if (yearItems != null) {
+      this.yearItems.addAll(yearItems);
+    }
+
+    months.clear();
+    for (Month month : Month.values()) {
+      months.put(month, new YearMonth(this, month));
+    }
+  }
+
+  public SpendingsDatabase getDb() {
+    return db;
   }
 
   public int getYear() {
     return year;
   }
 
+  public List<Item> getYearItems() {
+    return yearItems;
+  }
+
+  public void setYearItemIds(List<Integer> itemIds) {
+    yearItems.clear();
+    for (Integer itemId : itemIds) {
+      yearItems.add(db.getItem(itemId));
+    }
+  }
+
   public Map<Month, YearMonth> getMonths() {
     return months;
+  }
+
+  public void setMonths(List<YearMonth> months) {
+    this.months.clear();
+    for (YearMonth month : months) {
+      this.months.put(month.getMonth(), month);
+    }
   }
 
   @Override
   public int hashCode() {
     int hash = 7;
-    hash = 41 * hash + this.year;
+    hash = 17 * hash + Objects.hashCode(this.db);
+    hash = 17 * hash + this.year;
     return hash;
   }
 
@@ -49,11 +92,18 @@ public class Year {
       return false;
     }
     final Year other = (Year) obj;
-    return this.year == other.year;
+    if (this.year != other.year) {
+      return false;
+    }
+    return Objects.equals(this.db, other.db);
   }
 
   @Override
   public String toString() {
     return "Year{" + "year=" + year + '}';
+  }
+
+  YearInfo createYearInfo() {
+    return new YearInfo(db, year);
   }
 }
