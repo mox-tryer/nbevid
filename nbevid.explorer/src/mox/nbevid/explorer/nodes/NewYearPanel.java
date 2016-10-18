@@ -16,7 +16,6 @@ import mox.nbevid.model.Item;
 import mox.nbevid.model.SpendingsDatabase;
 import mox.nbevid.model.YearInfo;
 import org.openide.util.ChangeSupport;
-import org.openide.util.Exceptions;
 
 
 /**

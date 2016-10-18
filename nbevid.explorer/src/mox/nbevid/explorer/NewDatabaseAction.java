@@ -11,7 +11,6 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.prefs.BackingStoreException;
 import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import mox.nbevid.model.SpendingsDatabase;
 import mox.nbevid.persistence.SpendingsDbPersister;
 import org.netbeans.api.progress.BaseProgressUtils;

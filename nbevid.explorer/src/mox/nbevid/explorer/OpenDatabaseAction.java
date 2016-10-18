@@ -10,8 +10,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.prefs.BackingStoreException;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import mox.nbevid.model.SpendingsDatabase;
 import mox.nbevid.persistence.SpendingsDbPersister;
 import org.netbeans.api.progress.BaseProgressUtils;
@@ -47,33 +45,24 @@ public final class OpenDatabaseAction implements ActionListener {
   public void actionPerformed(ActionEvent e) {
     final OpenDatabasePanel panel = new OpenDatabasePanel();
     final DialogDescriptor dd = new DialogDescriptor(panel, Bundle.CTL_OpenDatabaseTitle());
-    panel.addChangeListener(new ChangeListener() {
-      @Override
-      public void stateChanged(ChangeEvent e) {
-        dd.setValid(panel.validateValues());
-      }
-    });
+    panel.addChangeListener((chEv) -> dd.setValid(panel.validateValues()));
     dd.setValid(panel.validateValues());
     if (DialogDisplayer.getDefault().notify(dd).equals(DialogDescriptor.OK_OPTION)) {
       final ProgressHandle progress = ProgressHandle.createHandle(Bundle.MSG_OpeningDb());
-      BaseProgressUtils.runOffEventThreadWithProgressDialog(new Runnable() {
-        @Override
-        public void run() {
-          try {
-            if (EvidPreferences.getInstance().hasEvidInstance(panel.getDbFolder().getCanonicalPath())) {
-              DialogDisplayer.getDefault().notifyLater(new NotifyDescriptor.Message(Bundle.MSG_AlreadyOpened(), NotifyDescriptor.Message.ERROR_MESSAGE));
-              return;
-            }
-            
-            SpendingsDatabase db = SpendingsDbPersister.getDefault().load(panel.getDbFolder());
-            
-            EvidPreferences.getInstance().addEvidInstance(db.getName(), panel.getDbFolder().getCanonicalPath());
-          } catch (BackingStoreException | IOException ex) {
-            NotifyDescriptor.Message msg = new NotifyDescriptor.Message(Bundle.MSG_ErrorOpeningDb(), NotifyDescriptor.ERROR_MESSAGE);
-            DialogDisplayer.getDefault().notifyLater(msg);
-            Exceptions.printStackTrace(ex);
+      BaseProgressUtils.runOffEventThreadWithProgressDialog(() -> {
+        try {
+          if (EvidPreferences.getInstance().hasEvidInstance(panel.getDbFolder().getCanonicalPath())) {
+            DialogDisplayer.getDefault().notifyLater(new NotifyDescriptor.Message(Bundle.MSG_AlreadyOpened(), NotifyDescriptor.Message.ERROR_MESSAGE));
+            return;
           }
 
+          SpendingsDatabase db = SpendingsDbPersister.getDefault().load(panel.getDbFolder());
+          
+          EvidPreferences.getInstance().addEvidInstance(db.getName(), panel.getDbFolder().getCanonicalPath());
+        } catch (BackingStoreException | IOException ex) {
+          NotifyDescriptor.Message msg = new NotifyDescriptor.Message(Bundle.MSG_ErrorOpeningDb(), NotifyDescriptor.ERROR_MESSAGE);
+          DialogDisplayer.getDefault().notifyLater(msg);
+          Exceptions.printStackTrace(ex);
         }
       }, Bundle.CTL_OpeningDbTitle(), progress, false, 200, 1000);
     }

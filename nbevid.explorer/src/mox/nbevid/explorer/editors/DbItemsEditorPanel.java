@@ -17,10 +17,7 @@ import static javax.swing.Action.SHORT_DESCRIPTION;
 import javax.swing.JComponent;
 import javax.swing.JToolBar;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import mox.nbevid.explorer.NbEvidExplorerTopComponent;
 import mox.nbevid.explorer.nodes.DbInfo;
@@ -93,13 +90,10 @@ public class DbItemsEditorPanel extends javax.swing.JPanel implements MultiViewE
 
     table.adjustColumns();
 
-    table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-      @Override
-      public void valueChanged(ListSelectionEvent e) {
-        int index = e.getFirstIndex();
-        Item item = (index < 0) ? null : tableModel.getItem(index);
-        removeItemAction.checkItem(item);
-      }
+    table.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
+      int index = e.getFirstIndex();
+      Item item = (index < 0) ? null : tableModel.getItem(index);
+      removeItemAction.checkItem(item);
     });
   }
 
@@ -377,12 +371,7 @@ public class DbItemsEditorPanel extends javax.swing.JPanel implements MultiViewE
     public void actionPerformed(ActionEvent e) {
       final NewItemPanel panel = new NewItemPanel();
       final DialogDescriptor dd = new DialogDescriptor(panel, Bundle.LBL_AddItemTitle());
-      panel.addChangeListener(new ChangeListener() {
-        @Override
-        public void stateChanged(ChangeEvent e) {
-          dd.setValid(panel.validateValues());
-        }
-      });
+      panel.addChangeListener((chEv) -> dd.setValid(panel.validateValues()));
       dd.setValid(panel.validateValues());
       if (DialogDisplayer.getDefault().notify(dd).equals(DialogDescriptor.OK_OPTION)) {
         tableModel.addItem(panel.getItemName(), panel.getItemType());
