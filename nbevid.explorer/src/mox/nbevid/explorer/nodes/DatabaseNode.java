@@ -43,8 +43,8 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
   private static final OpenAction openAction = new OpenAction();
   private static final NewYearAction newYearAction = new NewYearAction();
 
-  public DatabaseNode(String name, File dbDirectory, SpendingsDatabase db) {
-    super(Children.create(new YearFactory(db), true), Lookups.fixed(db, new DbInfo(db, dbDirectory)));
+  private DatabaseNode(String name, File dbDirectory, SpendingsDatabase db, DbInfo dbInfo) {
+    super(Children.create(new YearFactory(db, dbInfo), true), Lookups.fixed(db, dbInfo));
     this.name = name;
     this.dbDirectory = dbDirectory;
     this.db = db;
@@ -52,6 +52,10 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
     setIconBaseWithExtension("mox/nbevid/explorer/resources/db.png");
 
     setDisplayName(name);
+  }
+  
+  public static DatabaseNode create(String name, File dbDirectory, SpendingsDatabase db) {
+    return new DatabaseNode(name, dbDirectory, db, new DbInfo(db, dbDirectory));
   }
 
   @Override
@@ -67,9 +71,11 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
 
   private static class YearFactory extends ChildFactory<YearInfo> {
     private final SpendingsDatabase db;
+    private final DbInfo dbInfo;
 
-    public YearFactory(SpendingsDatabase db) {
+    public YearFactory(SpendingsDatabase db, DbInfo dbInfo) {
       this.db = db;
+      this.dbInfo = dbInfo;
       db.addYearsChangeListener((e) -> refresh(false));
     }
 
@@ -81,7 +87,7 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
 
     @Override
     protected Node createNodeForKey(YearInfo key) {
-      return new YearNode(key);
+      return YearNode.create(key, dbInfo);
     }
   }
 
@@ -118,7 +124,7 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
         p.addChangeListener((e) -> dd.setValid(p.validateValues()));
         if (DialogDisplayer.getDefault().notify(dd).equals(DialogDescriptor.OK_OPTION)) {
           Year newYear = new Year(db, p.getSelectedYear(), p.getSelectedItems());
-          db.addYear(newYear);
+          db.addNewYear(newYear);
           dbInfo.dbChanged();
         }
       }

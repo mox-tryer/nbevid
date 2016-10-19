@@ -7,6 +7,7 @@ package mox.nbevid.model;
 
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +22,7 @@ public class Year {
   private final SpendingsDatabase db;
   private final int year;
   private final List<Item> yearItems = new ArrayList<>();
-  private final Map<Month, YearMonth> months = new HashMap<>();
+  private final Map<Month, YearMonth> months = new EnumMap<>(Month.class);
 
   public Year(SpendingsDatabase db, int year) {
     this(db, year, null);
@@ -70,6 +71,10 @@ public class Year {
     for (YearMonth month : months) {
       this.months.put(month.getMonth(), month);
     }
+  }
+  
+  public YearMonth getMonth(Month month) {
+    return months.get(month);
   }
 
   @Override
