@@ -87,6 +87,10 @@ public class SpendingsDatabase {
     lastYearItems.clear();
     lastYearItems.addAll(year.getYearItems());
     
+    for (Item yearItem : year.getYearItems()) {
+      yearItem.incYearUsageCount();
+    }
+    
     yearsChangeSupport.fireChange();
   }
   
