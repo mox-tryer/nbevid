@@ -20,6 +20,8 @@ import org.openide.util.ChangeSupport;
  * @author martin
  */
 public class SpendingsDatabase {
+  // TODO: synchronization
+  
   private final String name;
   private final Map<Integer, Item> allItems = new HashMap<>();
   private final List<Item> lastYearItems = new ArrayList<>();
@@ -76,7 +78,7 @@ public class SpendingsDatabase {
     return years;
   }
   
-  public void addYear(Year year) {
+  public void addNewYear(Year year) {
     if (years.containsKey(year.getYear())) {
       // TODO: throw exception
       return;
@@ -100,6 +102,18 @@ public class SpendingsDatabase {
   
   public void removeYearsChangeListener(ChangeListener listener) {
     yearsChangeSupport.removeChangeListener(listener);
+  }
+  
+  public boolean isYearLoaded(YearInfo yearInfo) {
+    return years.get(yearInfo.getYear()) != null;
+  }
+  
+  public Year getYear(YearInfo yearInfo) {
+    return years.get(yearInfo.getYear());
+  }
+  
+  public void addLoadedYear(Year year) {
+    years.put(year.getYear(), year);
   }
 
   @Override

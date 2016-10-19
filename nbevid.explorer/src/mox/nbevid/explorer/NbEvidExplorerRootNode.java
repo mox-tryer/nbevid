@@ -103,8 +103,7 @@ public class NbEvidExplorerRootNode extends AbstractNode {
 
     private Node getRootNode() {
       try {
-        // TODO: dokoncit
-        return new DatabaseNode(name, dbDirectory, SpendingsDbPersister.getDefault().load(dbDirectory));
+        return DatabaseNode.create(name, dbDirectory, SpendingsDbPersister.getDefault().load(dbDirectory));
       } catch (IOException ex) {
         Exceptions.printStackTrace(ex);
         return null;
