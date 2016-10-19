@@ -21,6 +21,7 @@ public class MonthNode extends AbstractNode implements Lookup.Provider {
   private MonthNode(YearMonth yearMonth, DbInfo dbInfo) {
     super(Children.LEAF);
     
+    setIconBaseWithExtension("mox/nbevid/explorer/resources/month.png");
     setDisplayName(NbBundle.getMessage(MonthNode.class, "month." + yearMonth.getMonth().name() + ".text"));
   }
   

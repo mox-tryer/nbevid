@@ -46,6 +46,7 @@ public class YearNode extends AbstractNode implements Lookup.Provider {
     this.yearLookupContent = yearLookupContent;
     this.yearLookup = yearLookup;
 
+    setIconBaseWithExtension("mox/nbevid/explorer/resources/year.png");
     this.setDisplayName(Integer.toString(yearInfo.getYear()));
   }
 
