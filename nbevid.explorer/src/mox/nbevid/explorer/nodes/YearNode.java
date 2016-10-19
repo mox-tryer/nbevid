@@ -19,8 +19,8 @@ import org.openide.nodes.AbstractNode;
 import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
-import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
+import org.openide.util.NbBundle;
 import org.openide.util.lookup.AbstractLookup;
 import org.openide.util.lookup.InstanceContent;
 import org.openide.util.lookup.Lookups;
@@ -90,13 +90,14 @@ public class YearNode extends AbstractNode implements Lookup.Provider {
       }
     }
 
+    @NbBundle.Messages({"MSG_YearLoadError=Error while loading year"})
     @Override
     protected boolean createKeys(List<YearMonth> toPopulate) {
       Year year;
       try {
         year = getYear();
       } catch (IOException ex) {
-        DialogDisplayer.getDefault().notifyLater(new NotifyDescriptor.Message("Error", NotifyDescriptor.ERROR_MESSAGE));
+        DialogDisplayer.getDefault().notifyLater(new NotifyDescriptor.Message(Bundle.MSG_YearLoadError(), NotifyDescriptor.ERROR_MESSAGE));
         return true;
       }
       

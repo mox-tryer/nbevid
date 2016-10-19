@@ -10,6 +10,7 @@ import mox.nbevid.model.YearMonth;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.util.Lookup;
+import org.openide.util.NbBundle;
 
 
 /**
@@ -20,7 +21,7 @@ public class MonthNode extends AbstractNode implements Lookup.Provider {
   private MonthNode(YearMonth yearMonth, DbInfo dbInfo) {
     super(Children.LEAF);
     
-    setDisplayName(yearMonth.getMonth().name());
+    setDisplayName(NbBundle.getMessage(MonthNode.class, "month." + yearMonth.getMonth().name() + ".text"));
   }
   
   public static MonthNode create(YearMonth yearMonth, DbInfo dbInfo) {
