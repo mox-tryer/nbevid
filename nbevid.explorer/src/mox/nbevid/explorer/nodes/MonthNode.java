@@ -7,9 +7,13 @@ package mox.nbevid.explorer.nodes;
 
 
 import java.beans.BeanInfo;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import javax.swing.Action;
 import static javax.swing.Action.NAME;
+import mox.nbevid.explorer.editors.DbItemsEditorPanel;
 import mox.nbevid.explorer.editors.MonthEditorPanel;
+import mox.nbevid.model.SpendingsDatabase;
 import mox.nbevid.model.YearMonth;
 import org.netbeans.core.spi.multiview.MultiViewDescription;
 import org.netbeans.core.spi.multiview.MultiViewFactory;
@@ -34,7 +38,7 @@ public class MonthNode extends AbstractNode implements Lookup.Provider {
 //  private final YearMonth yearMonth;
   
   private MonthNode(YearMonth yearMonth, DbInfo dbInfo) {
-    super(Children.LEAF, Lookups.fixed(yearMonth, dbInfo));
+    super(Children.LEAF, Lookups.fixed(yearMonth, dbInfo, new MonthEditorCookie()));
     
 //    this.yearMonth = yearMonth;
     
@@ -56,6 +60,39 @@ public class MonthNode extends AbstractNode implements Lookup.Provider {
     return new Action[] {getPreferredAction()};
   }
   
+  public static final class MonthEditorCookie {
+    private TopComponent editor = null;
+    private final Object lock = new Object();
+
+    public void openEditor(Node node, YearMonth yearMonth, DbInfo dbInfo) {
+      synchronized (lock) {
+        if (editor == null) {
+        MultiViewDescription[] descriptions = new MultiViewDescription[1];
+        descriptions[0] = new MonthEditorPanel.Description(node.getIcon(BeanInfo.ICON_COLOR_16x16), yearMonth, dbInfo);
+
+          editor = MultiViewFactory.createMultiView(descriptions, descriptions[0]);
+          
+          TopComponent.getRegistry().addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+              if (TopComponent.Registry.PROP_TC_CLOSED.equals(evt.getPropertyName())) {
+                if (evt.getNewValue() == editor) {
+                  TopComponent.getRegistry().removePropertyChangeListener(this);
+
+                  editor = null;
+                }
+              }
+            }
+          });
+        }
+
+        editor.setDisplayName(String.format("%s %d", NbBundle.getMessage(MonthNode.class, "month." + yearMonth.getMonth().name() + ".text"), yearMonth.getYear().getYear()));
+        editor.open();
+        editor.requestActive();
+      }
+    }
+  }
+  
   public static class OpenAction extends NodeAction {
     private static final long serialVersionUID = 1L;
 
@@ -73,15 +110,9 @@ public class MonthNode extends AbstractNode implements Lookup.Provider {
       for (Node node : activatedNodes) {
         final YearMonth yearMonth = node.getLookup().lookup(YearMonth.class);
         final DbInfo dbInfo = node.getLookup().lookup(DbInfo.class);
-
-        MultiViewDescription[] descriptions = new MultiViewDescription[1];
-        descriptions[0] = new MonthEditorPanel.Description(node.getIcon(BeanInfo.ICON_COLOR_16x16), yearMonth, dbInfo);
-
-        TopComponent dbEditor = MultiViewFactory.createMultiView(descriptions, descriptions[0]);
-
-        dbEditor.setDisplayName(String.format("%s %d", NbBundle.getMessage(MonthNode.class, "month." + yearMonth.getMonth().name() + ".text"), yearMonth.getYear().getYear()));
-        dbEditor.open();
-        dbEditor.requestActive();
+        final MonthEditorCookie editorCookie = node.getLookup().lookup(MonthEditorCookie.class);
+        
+        editorCookie.openEditor(node, yearMonth, dbInfo);
       }
     }
 
@@ -97,6 +128,10 @@ public class MonthNode extends AbstractNode implements Lookup.Provider {
         }
 
         if (node.getLookup().lookup(DbInfo.class) == null) {
+          return false;
+        }
+        
+        if (node.getLookup().lookup(MonthEditorCookie.class) == null) {
           return false;
         }
       }

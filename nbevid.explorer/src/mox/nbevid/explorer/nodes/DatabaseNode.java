@@ -7,6 +7,8 @@ package mox.nbevid.explorer.nodes;
 
 
 import java.beans.BeanInfo;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.List;
@@ -44,7 +46,7 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
   private static final NewYearAction newYearAction = new NewYearAction();
 
   private DatabaseNode(String name, File dbDirectory, SpendingsDatabase db, DbInfo dbInfo) {
-    super(Children.create(new YearFactory(db, dbInfo), true), Lookups.fixed(db, dbInfo));
+    super(Children.create(new YearFactory(db, dbInfo), true), Lookups.fixed(db, dbInfo, new DatabaseEditorCookie()));
     this.name = name;
     this.dbDirectory = dbDirectory;
     this.db = db;
@@ -53,7 +55,7 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
 
     setDisplayName(name);
   }
-  
+
   public static DatabaseNode create(String name, File dbDirectory, SpendingsDatabase db) {
     return new DatabaseNode(name, dbDirectory, db, new DbInfo(db, dbDirectory));
   }
@@ -161,6 +163,40 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
   }
 
 
+  public static final class DatabaseEditorCookie {
+    private TopComponent editor = null;
+    private final Object lock = new Object();
+
+    public void openEditor(Node node, SpendingsDatabase db, DbInfo dbInfo) {
+      synchronized (lock) {
+        if (editor == null) {
+          MultiViewDescription[] descriptions = new MultiViewDescription[1];
+          descriptions[0] = new DbItemsEditorPanel.Description(node.getIcon(BeanInfo.ICON_COLOR_16x16), db, dbInfo);
+
+          editor = MultiViewFactory.createMultiView(descriptions, descriptions[0]);
+          
+          TopComponent.getRegistry().addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+              if (TopComponent.Registry.PROP_TC_CLOSED.equals(evt.getPropertyName())) {
+                if (evt.getNewValue() == editor) {
+                  TopComponent.getRegistry().removePropertyChangeListener(this);
+
+                  editor = null;
+                }
+              }
+            }
+          });
+        }
+
+        editor.setDisplayName(db.getName());
+        editor.open();
+        editor.requestActive();
+      }
+    }
+  }
+
+
   @NbBundle.Messages("LBL_Action_Open=Open")
   public static class OpenAction extends NodeAction {
     private static final long serialVersionUID = 1L;
@@ -179,15 +215,9 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
       for (Node node : activatedNodes) {
         final SpendingsDatabase db = node.getLookup().lookup(SpendingsDatabase.class);
         final DbInfo dbInfo = node.getLookup().lookup(DbInfo.class);
-
-        MultiViewDescription[] descriptions = new MultiViewDescription[1];
-        descriptions[0] = new DbItemsEditorPanel.Description(node.getIcon(BeanInfo.ICON_COLOR_16x16), db, dbInfo);
-
-        TopComponent dbEditor = MultiViewFactory.createMultiView(descriptions, descriptions[0]);
-
-        dbEditor.setDisplayName(db.getName());
-        dbEditor.open();
-        dbEditor.requestActive();
+        final DatabaseEditorCookie editorCookie = node.getLookup().lookup(DatabaseEditorCookie.class);
+        
+        editorCookie.openEditor(node, db, dbInfo);
       }
     }
 
@@ -203,6 +233,10 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
         }
 
         if (node.getLookup().lookup(DbInfo.class) == null) {
+          return false;
+        }
+        
+        if (node.getLookup().lookup(DatabaseEditorCookie.class) == null) {
           return false;
         }
       }
