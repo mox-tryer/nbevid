@@ -75,4 +75,16 @@ public class YearMonth {
   public String toString() {
     return "YearMonth{" + "year=" + year + ", month=" + month + '}';
   }
+
+  public void setValue(Item item, BigDecimal value) {
+    values.put(item, value);
+  }
+
+  public void addValue(Item item, BigDecimal value) {
+    if (values.get(item) == null) {
+      setValue(item, value);
+    } else {
+      values.put(item, values.get(item).add(value));
+    }
+  }
 }
