@@ -83,6 +83,9 @@ public class DbItemsEditorPanel extends javax.swing.JPanel implements MultiViewE
   }
 
   private void initTable() {
+    // TODO: velkost fontu v tabulke nacitat z Options
+    table.setFont(table.getFont().deriveFont(15f));
+    
     table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     table.setAutoResizeMode(DataTable.AUTO_RESIZE_OFF);
     table.setCellSelectionEnabled(false);
@@ -111,17 +114,11 @@ public class DbItemsEditorPanel extends javax.swing.JPanel implements MultiViewE
     this.setLayout(layout);
     layout.setHorizontalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(layout.createSequentialGroup()
-        .addContainerGap()
-        .addComponent(itemsTableScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 376, Short.MAX_VALUE)
-        .addContainerGap())
+      .addComponent(itemsTableScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
     );
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(layout.createSequentialGroup()
-        .addContainerGap()
-        .addComponent(itemsTableScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 276, Short.MAX_VALUE)
-        .addContainerGap())
+      .addComponent(itemsTableScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
     );
   }// </editor-fold>//GEN-END:initComponents
 
@@ -234,7 +231,7 @@ public class DbItemsEditorPanel extends javax.swing.JPanel implements MultiViewE
 
 
   @NbBundle.Messages({"COL_ItemId=Id", "COL_ItemName=Name", "COL_ItemType=Type"})
-  private class ItemsTableModel extends AbstractTableModel {
+  private static class ItemsTableModel extends AbstractTableModel {
     private static final long serialVersionUID = 1L;
 
     private final SpendingsDatabase db;
