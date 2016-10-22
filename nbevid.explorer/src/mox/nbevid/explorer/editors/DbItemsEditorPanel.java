@@ -83,6 +83,7 @@ public class DbItemsEditorPanel extends javax.swing.JPanel implements MultiViewE
   }
 
   private void initTable() {
+    // TODO: velkost fontu v tabulke nacitat z Options
     table.setFont(table.getFont().deriveFont(15f));
     
     table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -230,7 +231,7 @@ public class DbItemsEditorPanel extends javax.swing.JPanel implements MultiViewE
 
 
   @NbBundle.Messages({"COL_ItemId=Id", "COL_ItemName=Name", "COL_ItemType=Type"})
-  private class ItemsTableModel extends AbstractTableModel {
+  private static class ItemsTableModel extends AbstractTableModel {
     private static final long serialVersionUID = 1L;
 
     private final SpendingsDatabase db;

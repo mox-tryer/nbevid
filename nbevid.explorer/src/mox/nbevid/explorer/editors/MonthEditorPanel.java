@@ -7,18 +7,25 @@ package mox.nbevid.explorer.editors;
 
 
 import java.awt.Image;
+import java.awt.event.MouseEvent;
+import java.math.BigDecimal;
 import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JToolBar;
+import javax.swing.ListSelectionModel;
+import javax.swing.table.AbstractTableModel;
 import mox.nbevid.explorer.nodes.DbInfo;
+import mox.nbevid.model.Item;
 import mox.nbevid.model.YearMonth;
 import org.netbeans.core.spi.multiview.CloseOperationState;
 import org.netbeans.core.spi.multiview.MultiViewDescription;
 import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.MultiViewElementCallback;
+import org.netbeans.swing.etable.ETable;
 import org.openide.awt.UndoRedo;
 import org.openide.util.HelpCtx;
 import org.openide.util.Lookup;
+import org.openide.util.NbBundle;
 import org.openide.util.lookup.Lookups;
 import org.openide.windows.TopComponent;
 
@@ -37,6 +44,9 @@ public class MonthEditorPanel extends javax.swing.JPanel implements MultiViewEle
   private final YearMonth month;
   private final DbInfo dbInfo;
   private final Lookup lookup;
+  
+  private final DataTable table;
+  private final MonthItemsOverviewTableModel tableModel;
 
   /**
    * Creates new form MonthEditorPanel
@@ -47,6 +57,23 @@ public class MonthEditorPanel extends javax.swing.JPanel implements MultiViewEle
     this.lookup = Lookups.fixed(month, dbInfo);
     
     initComponents();
+    
+    tableModel = new MonthItemsOverviewTableModel(month);
+    table = new DataTable(tableModel);
+    initTable();
+    itemsOverviewScrollPane.setViewportView(table);
+  }
+
+  private void initTable() {
+    // TODO: velkost fontu v tabulke nacitat z Options
+    table.setFont(table.getFont().deriveFont(15f));
+    
+    table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    table.setAutoResizeMode(DataTable.AUTO_RESIZE_OFF);
+    table.setCellSelectionEnabled(false);
+    table.setColumnSelectionOn(MouseEvent.BUTTON3, ETable.ColumnSelection.NO_SELECTION);
+
+    table.adjustColumns();
   }
 
   /**
@@ -241,6 +268,81 @@ public class MonthEditorPanel extends javax.swing.JPanel implements MultiViewEle
     @Override
     public MultiViewElement createElement() {
       return new MonthEditorPanel(month, dbInfo);
+    }
+  }
+  
+  @NbBundle.Messages({"COL_ItemValue=Value"})
+  private static class MonthItemsOverviewTableModel extends AbstractTableModel {
+    private static final long serialVersionUID = 1L;
+
+    private final YearMonth yearMonth;
+
+    public MonthItemsOverviewTableModel(YearMonth yearMonth) {
+      this.yearMonth = yearMonth;
+    }
+
+    @Override
+    public int getRowCount() {
+      return yearMonth.getYear().getYearItems().size();
+    }
+
+    @Override
+    public int getColumnCount() {
+      return 2;
+    }
+
+    @Override
+    public String getColumnName(int columnIndex) {
+      switch (columnIndex) {
+        case 0:
+          return Bundle.COL_ItemName();
+        case 1:
+          return Bundle.COL_ItemValue();
+        default:
+          return "???";
+      }
+    }
+
+    @Override
+    public Class<?> getColumnClass(int columnIndex) {
+      switch (columnIndex) {
+        case 1:
+          return BigDecimal.class;
+        default:
+          return String.class;
+      }
+    }
+
+    @Override
+    public Object getValueAt(int rowIndex, int columnIndex) {
+      Item item = getItem(rowIndex);
+
+      switch (columnIndex) {
+        case 0:
+          return item.getItemName();
+        case 1:
+          return yearMonth.getValues().get(item);
+        default:
+          return "???";
+      }
+    }
+
+    public Item getItem(int rowIndex) {
+      return yearMonth.getYear().getYearItems().get(rowIndex);
+    }
+    
+    private int getItemIndex(Item item) {
+      return yearMonth.getYear().getYearItems().indexOf(item);
+    }
+
+    @Override
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+      return false;
+    }
+    
+    private void fireItemChanged(Item item) {
+      int rowIndex = getItemIndex(item);
+      fireTableCellUpdated(rowIndex, 1);
     }
   }
 }
