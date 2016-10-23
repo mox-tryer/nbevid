@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -24,6 +23,8 @@ import mox.nbevid.model.Year;
 import mox.nbevid.model.YearInfo;
 import mox.nbevid.persistence.model.SpendingsDatabaseExt;
 import mox.nbevid.persistence.model.YearExt;
+import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
 
 
 /**
@@ -58,8 +59,25 @@ public class SpendingsDbPersister {
     return new File(directory, String.format("year%04d.json", yearInfo.getYear()));
   }
   
+  private static void backupFile(File f) throws IOException {
+    if (!f.exists()) {
+      return;
+    }
+    
+    final FileObject fo = FileUtil.toFileObject(f);
+    final FileObject bkpFo = FileUtil.findBrother(fo, "bak");
+    if (bkpFo != null) {
+      bkpFo.delete();
+    }
+    
+    FileUtil.copyFile(fo, fo.getParent(), fo.getName(), "bak");
+  }
+  
   public void save(SpendingsDatabase db, File directory) throws IOException {
-    try (Writer writer = new OutputStreamWriter(new FileOutputStream(mainDbFile(directory)), "UTF-8")) {
+    final File mainDbFile = mainDbFile(directory);
+    backupFile(mainDbFile);
+    
+    try (Writer writer = new OutputStreamWriter(new FileOutputStream(mainDbFile), "UTF-8")) {
       mapper.writeValue(writer, SpendingsDatabaseExt.createFromModel(db));
     }
     
@@ -68,8 +86,11 @@ public class SpendingsDbPersister {
     }
   }
 
-  public void save(Year year, File directory) throws IOException {
-    try (Writer writer = new OutputStreamWriter(new FileOutputStream(yearDbFile(directory, year)), "UTF-8")) {
+  private void save(Year year, File directory) throws IOException {
+    final File yearDbFile = yearDbFile(directory, year);
+    backupFile(yearDbFile);
+    
+    try (Writer writer = new OutputStreamWriter(new FileOutputStream(yearDbFile), "UTF-8")) {
       mapper.writeValue(writer, YearExt.createFromModel(year));
     }
   }

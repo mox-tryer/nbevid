@@ -10,10 +10,11 @@ import org.openide.modules.ModuleInstall;
 
 
 public class Installer extends ModuleInstall {
+  private static final long serialVersionUID = 1L;
 
   @Override
   public void restored() {
-    System.setProperty("netbeans.buildnumber", "1.0");
+    System.setProperty("netbeans.buildnumber", "0.1");
   }
 
 }

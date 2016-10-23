@@ -29,6 +29,14 @@ public class YearInfo implements Comparable<YearInfo> {
   public int getYear() {
     return year;
   }
+  
+  public boolean isLoaded() {
+    return db.isYearLoaded(this);
+  }
+  
+  public Year get() {
+    return db.getYear(this);
+  }
 
   @Override
   public int hashCode() {

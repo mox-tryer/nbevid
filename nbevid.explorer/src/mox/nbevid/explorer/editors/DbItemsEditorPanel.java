@@ -17,10 +17,7 @@ import static javax.swing.Action.SHORT_DESCRIPTION;
 import javax.swing.JComponent;
 import javax.swing.JToolBar;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import mox.nbevid.explorer.NbEvidExplorerTopComponent;
 import mox.nbevid.explorer.nodes.DbInfo;
@@ -86,6 +83,9 @@ public class DbItemsEditorPanel extends javax.swing.JPanel implements MultiViewE
   }
 
   private void initTable() {
+    // TODO: velkost fontu v tabulke nacitat z Options
+    table.setFont(table.getFont().deriveFont(15f));
+    
     table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     table.setAutoResizeMode(DataTable.AUTO_RESIZE_OFF);
     table.setCellSelectionEnabled(false);
@@ -93,13 +93,10 @@ public class DbItemsEditorPanel extends javax.swing.JPanel implements MultiViewE
 
     table.adjustColumns();
 
-    table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-      @Override
-      public void valueChanged(ListSelectionEvent e) {
-        int index = e.getFirstIndex();
-        Item item = (index < 0) ? null : tableModel.getItem(index);
-        removeItemAction.checkItem(item);
-      }
+    table.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
+      int index = e.getFirstIndex();
+      Item item = (index < 0) ? null : tableModel.getItem(index);
+      removeItemAction.checkItem(item);
     });
   }
 
@@ -117,17 +114,11 @@ public class DbItemsEditorPanel extends javax.swing.JPanel implements MultiViewE
     this.setLayout(layout);
     layout.setHorizontalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(layout.createSequentialGroup()
-        .addContainerGap()
-        .addComponent(itemsTableScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 376, Short.MAX_VALUE)
-        .addContainerGap())
+      .addComponent(itemsTableScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
     );
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(layout.createSequentialGroup()
-        .addContainerGap()
-        .addComponent(itemsTableScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 276, Short.MAX_VALUE)
-        .addContainerGap())
+      .addComponent(itemsTableScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
     );
   }// </editor-fold>//GEN-END:initComponents
 
@@ -212,9 +203,10 @@ public class DbItemsEditorPanel extends javax.swing.JPanel implements MultiViewE
       return TopComponent.PERSISTENCE_NEVER;
     }
 
+    @NbBundle.Messages("DbItemEditorPanel.displayName=Items")
     @Override
     public String getDisplayName() {
-      return "Items";
+      return Bundle.DbItemEditorPanel_displayName();
     }
 
     @Override
@@ -240,7 +232,7 @@ public class DbItemsEditorPanel extends javax.swing.JPanel implements MultiViewE
 
 
   @NbBundle.Messages({"COL_ItemId=Id", "COL_ItemName=Name", "COL_ItemType=Type"})
-  private class ItemsTableModel extends AbstractTableModel {
+  private static class ItemsTableModel extends AbstractTableModel {
     private static final long serialVersionUID = 1L;
 
     private final SpendingsDatabase db;
@@ -377,12 +369,7 @@ public class DbItemsEditorPanel extends javax.swing.JPanel implements MultiViewE
     public void actionPerformed(ActionEvent e) {
       final NewItemPanel panel = new NewItemPanel();
       final DialogDescriptor dd = new DialogDescriptor(panel, Bundle.LBL_AddItemTitle());
-      panel.addChangeListener(new ChangeListener() {
-        @Override
-        public void stateChanged(ChangeEvent e) {
-          dd.setValid(panel.validateValues());
-        }
-      });
+      panel.addChangeListener((chEv) -> dd.setValid(panel.validateValues()));
       dd.setValid(panel.validateValues());
       if (DialogDisplayer.getDefault().notify(dd).equals(DialogDescriptor.OK_OPTION)) {
         tableModel.addItem(panel.getItemName(), panel.getItemType());

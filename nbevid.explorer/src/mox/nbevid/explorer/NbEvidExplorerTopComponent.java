@@ -8,7 +8,6 @@ package mox.nbevid.explorer;
 
 import java.awt.BorderLayout;
 import javax.swing.ActionMap;
-import javax.swing.text.DefaultEditorKit;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;

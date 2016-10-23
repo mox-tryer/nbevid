@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.prefs.BackingStoreException;
 import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import mox.nbevid.persistence.SpendingsDbPersister;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.ChildFactory;
@@ -104,8 +103,7 @@ public class NbEvidExplorerRootNode extends AbstractNode {
 
     private Node getRootNode() {
       try {
-        // TODO: dokoncit
-        return new DatabaseNode(name, dbDirectory, SpendingsDbPersister.getDefault().load(dbDirectory));
+        return DatabaseNode.create(name, dbDirectory, SpendingsDbPersister.getDefault().load(dbDirectory));
       } catch (IOException ex) {
         Exceptions.printStackTrace(ex);
         return null;
