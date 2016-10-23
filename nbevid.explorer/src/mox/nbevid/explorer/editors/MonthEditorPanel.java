@@ -195,14 +195,14 @@ public class MonthEditorPanel extends javax.swing.JPanel implements MultiViewEle
         .addContainerGap()
         .addComponent(itemLabel)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(itemsComboBox, 0, 247, Short.MAX_VALUE)
+        .addComponent(itemsComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 247, javax.swing.GroupLayout.PREFERRED_SIZE)
         .addGap(18, 18, 18)
         .addComponent(itemValueFormattedTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 182, javax.swing.GroupLayout.PREFERRED_SIZE)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addComponent(addValueButton)
         .addGap(26, 26, 26)
         .addComponent(resetValueButton)
-        .addGap(134, 134, 134))
+        .addContainerGap(134, Short.MAX_VALUE))
     );
     itemEditPanelLayout.setVerticalGroup(
       itemEditPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -334,9 +334,10 @@ public class MonthEditorPanel extends javax.swing.JPanel implements MultiViewEle
       return TopComponent.PERSISTENCE_NEVER;
     }
 
+    @NbBundle.Messages("MonthEditorPanel.displayName=Editor")
     @Override
     public String getDisplayName() {
-      return "Items";
+      return Bundle.MonthEditorPanel_displayName();
     }
 
     @Override

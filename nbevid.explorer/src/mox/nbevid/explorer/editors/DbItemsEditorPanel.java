@@ -203,9 +203,10 @@ public class DbItemsEditorPanel extends javax.swing.JPanel implements MultiViewE
       return TopComponent.PERSISTENCE_NEVER;
     }
 
+    @NbBundle.Messages("DbItemEditorPanel.displayName=Items")
     @Override
     public String getDisplayName() {
-      return "Items";
+      return Bundle.DbItemEditorPanel_displayName();
     }
 
     @Override
