@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE module_updates PUBLIC "-//NetBeans//DTD Autoupdate Catalog 2.6//EN" "http://www.netbeans.org/dtds/autoupdate-catalog-2_6.dtd">
+<module_updates timestamp="52/30/10/23/10/2016">
+
+
+
+<module autoload="true" codenamebase="mox.nbevid.lib.jackson" distribution="mox-nbevid-lib-jackson.nbm" downloadsize="406797" homepage="" license="AD9FBBC9" moduleauthor="" needsrestart="false" releasedate="2016/10/23" targetcluster="nbevid">
+    <manifest AutoUpdate-Show-In-Client="false" OpenIDE-Module="mox.nbevid.lib.jackson" OpenIDE-Module-Implementation-Version="161023" OpenIDE-Module-Java-Dependencies="Java &gt; 1.4" OpenIDE-Module-Name="lib.Jackson" OpenIDE-Module-Requires="org.openide.modules.ModuleFormat1" OpenIDE-Module-Specification-Version="2.8.0"/>
+    
+</module>
+
+<module codenamebase="mox.nbevid.branding" distribution="mox-nbevid-branding.nbm" downloadsize="3385" homepage="" license="AD9FBBC9" moduleauthor="" needsrestart="false" releasedate="2016/10/23" targetcluster="nbevid">
+    <manifest AutoUpdate-Show-In-Client="false" OpenIDE-Module="mox.nbevid.branding" OpenIDE-Module-Implementation-Version="161023" OpenIDE-Module-Java-Dependencies="Java &gt; 1.7" OpenIDE-Module-Module-Dependencies="org.openide.modules &gt; 7.47.1, org.openide.util.ui &gt; 9.4.1" OpenIDE-Module-Name="nbevid.branding" OpenIDE-Module-Requires="org.openide.modules.ModuleFormat1" OpenIDE-Module-Specification-Version="1.0"/>
+    
+</module>
+
+<module codenamebase="mox.nbevid.explorer" distribution="mox-nbevid-explorer.nbm" downloadsize="37600" homepage="" license="AD9FBBC9" moduleauthor="" needsrestart="false" releasedate="2016/10/23" targetcluster="nbevid">
+    <manifest AutoUpdate-Show-In-Client="false" OpenIDE-Module="mox.nbevid.explorer" OpenIDE-Module-Implementation-Version="161023" OpenIDE-Module-Java-Dependencies="Java &gt; 1.8" OpenIDE-Module-Module-Dependencies="mox.nbevid.model &gt; 1.0, mox.nbevid.persistence &gt; 1.0, org.netbeans.api.progress/1 &gt; 1.46.1, org.netbeans.core.multiview/1 &gt; 1.43.1, org.netbeans.modules.settings/1 &gt; 1.48.1, org.netbeans.swing.outline &gt; 1.32.1, org.openide.awt &gt; 7.65.1, org.openide.dialogs &gt; 7.41.1, org.openide.explorer &gt; 6.61.1, org.openide.nodes &gt; 7.42.1, org.openide.util &gt; 9.5.1, org.openide.util.lookup &gt; 8.32.1, org.openide.util.ui &gt; 9.4.1, org.openide.windows &gt; 6.74.1" OpenIDE-Module-Name="nbevid.explorer" OpenIDE-Module-Requires="org.openide.windows.WindowManager, org.openide.modules.ModuleFormat1" OpenIDE-Module-Specification-Version="1.0"/>
+    
+</module>
+
+<module codenamebase="mox.nbevid.model" distribution="mox-nbevid-model.nbm" downloadsize="6300" homepage="" license="AD9FBBC9" moduleauthor="" needsrestart="false" releasedate="2016/10/23" targetcluster="nbevid">
+    <manifest AutoUpdate-Show-In-Client="false" OpenIDE-Module="mox.nbevid.model" OpenIDE-Module-Implementation-Version="161023" OpenIDE-Module-Java-Dependencies="Java &gt; 1.7" OpenIDE-Module-Module-Dependencies="org.openide.util &gt; 9.5.1" OpenIDE-Module-Name="nbevid.model" OpenIDE-Module-Requires="org.openide.modules.ModuleFormat1" OpenIDE-Module-Specification-Version="1.0"/>
+    
+</module>
+
+<module codenamebase="mox.nbevid.persistence" distribution="mox-nbevid-persistence.nbm" downloadsize="7185" homepage="" license="AD9FBBC9" moduleauthor="" needsrestart="false" releasedate="2016/10/23" targetcluster="nbevid">
+    <manifest AutoUpdate-Show-In-Client="false" OpenIDE-Module="mox.nbevid.persistence" OpenIDE-Module-Implementation-Version="161023" OpenIDE-Module-Java-Dependencies="Java &gt; 1.7" OpenIDE-Module-Module-Dependencies="mox.nbevid.lib.jackson &gt; 2.8.0, mox.nbevid.model &gt; 1.0, org.openide.filesystems &gt; 9.8.1, org.openide.util.lookup &gt; 8.32.1" OpenIDE-Module-Name="nbevid.persistence" OpenIDE-Module-Requires="org.openide.filesystems.FileUtil.toFileObject, org.openide.modules.ModuleFormat1" OpenIDE-Module-Specification-Version="1.0"/>
+    
+</module>
+
+<license name="AD9FBBC9" url="licenses/AD9FBBC9.license"/>
+</module_updates>
+
