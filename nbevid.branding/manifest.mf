@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-AutoUpdate-Show-In-Client: true
+AutoUpdate-Show-In-Client: false
 OpenIDE-Module: mox.nbevid.branding
 OpenIDE-Module-Install: mox/nbevid/branding/Installer.class
 OpenIDE-Module-Localizing-Bundle: mox/nbevid/branding/Bundle.properties
