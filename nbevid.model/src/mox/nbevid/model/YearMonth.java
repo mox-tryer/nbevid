@@ -87,4 +87,12 @@ public class YearMonth {
       values.put(item, values.get(item).add(value));
     }
   }
+
+  public boolean hasValue(Item item) {
+    return values.containsKey(item);
+  }
+  
+  public BigDecimal getValue(Item item) {
+    return values.get(item);
+  }
 }
