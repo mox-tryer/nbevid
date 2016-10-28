@@ -97,7 +97,15 @@ public class MonthEditorPanel extends javax.swing.JPanel implements MultiViewEle
     table.adjustColumns();
   }
   
-  @NbBundle.Messages({"# {0} - value", "MSG_InvalidValue=Invalid number {0}"})
+  @NbBundle.Messages({
+    "# {0} - value",
+    "MSG_InvalidValue=Invalid number {0}",
+    "LBL_ConfirmResetTitle=Confirm Reset",
+    "# {0} - current value",
+    "# {1} - item name",
+    "# {2} - new value",
+    "MSG_ResetConfirmation=Do you want to replace value {0} on {1} with {2}?"
+  })
   private void addValue() {
     if (!itemValueFormattedTextField.isEditValid()) {
       DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message(Bundle.MSG_InvalidValue(itemValueFormattedTextField.getText()), NotifyDescriptor.ERROR_MESSAGE));
@@ -133,6 +141,15 @@ public class MonthEditorPanel extends javax.swing.JPanel implements MultiViewEle
     
     Item selectedItem = itemsComboBox.getItemAt(itemsComboBox.getSelectedIndex());
     BigDecimal value = (BigDecimal) itemValueFormattedTextField.getValue();
+    
+    if (month.hasValue(selectedItem)) {
+      NotifyDescriptor nd = new NotifyDescriptor.Confirmation(Bundle.MSG_ResetConfirmation(month.getValue(selectedItem), selectedItem, value),
+              Bundle.LBL_ConfirmResetTitle(), NotifyDescriptor.YES_NO_OPTION, NotifyDescriptor.WARNING_MESSAGE);
+      if (!DialogDisplayer.getDefault().notify(nd).equals(NotifyDescriptor.YES_OPTION)) {
+        return;
+      }
+    }
+    
     month.setValue(selectedItem, value);
     tableModel.fireItemChanged(selectedItem);
     dbInfo.dbChanged();
