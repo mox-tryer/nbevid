@@ -14,7 +14,7 @@ public class Installer extends ModuleInstall {
 
   @Override
   public void restored() {
-    System.setProperty("netbeans.buildnumber", "0.1.2");
+    System.setProperty("netbeans.buildnumber", "0.1.3");
   }
 
 }
