@@ -5,3 +5,4 @@ date:   2016-10-28 16:59:00 +0200
 categories: nbevid version
 ---
 
+Vo vsetkych verziach po 0.1.3 vratane tejto je chybajuci modul z platformy. To sposobi, ze po instalacii program nejde spustit. Takze tato verzia je nepouzitelna, takisto ako predchadzajuce. Je potrebne nainstalovat novsiu verziu.

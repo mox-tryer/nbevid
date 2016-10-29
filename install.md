@@ -11,7 +11,7 @@ alebo stiahnut instalacny program pre Windows.
 Instalacia zipu je jednoduchsia, pretoze staci len rozbalit. Ale musis si byt ista, ze mas na pocitaci nainstalovanu Java 8. Instalacny program by mal skontrolovat, ci je Java nainstalovana a ak nie, tak ju stiahne a nainstaluje.
 Instalacny program by aj mal pridat spustaciu ikonku na plochu.
 
-V pripade, ze to len rozbalis tak v podadresari bin su subory `nbevid.exe` a `nbevid64.exe`. Kedze mate 64bitove Windows a asi aj 64bitovu Javu, tak spustat by sa to malo s `nbevid64.exe`.
+V pripade, ze to len rozbalis tak v podadresari `bin` su subory `nbevid.exe` a `nbevid64.exe`. Kedze mate 64bitove Windows a asi aj 64bitovu Javu, tak spustat by sa to malo s `nbevid64.exe`.
 
 
 
