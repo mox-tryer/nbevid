@@ -4,5 +4,5 @@ OpenIDE-Module: mox.nbevid.branding
 OpenIDE-Module-Install: mox/nbevid/branding/Installer.class
 OpenIDE-Module-Layer: mox/nbevid/branding/layer.xml
 OpenIDE-Module-Localizing-Bundle: mox/nbevid/branding/Bundle.properties
-OpenIDE-Module-Specification-Version: 1.0.1.4
+OpenIDE-Module-Specification-Version: 1.0.1.4.1
 
