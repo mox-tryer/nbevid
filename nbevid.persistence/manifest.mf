@@ -3,5 +3,5 @@ AutoUpdate-Show-In-Client: false
 OpenIDE-Module: mox.nbevid.persistence
 OpenIDE-Module-Localizing-Bundle: mox/nbevid/persistence/Bundle.properties
 OpenIDE-Module-Requires: org.openide.filesystems.FileUtil.toFileObject
-OpenIDE-Module-Specification-Version: 1.0
+OpenIDE-Module-Specification-Version: 1.0.0.1
 
