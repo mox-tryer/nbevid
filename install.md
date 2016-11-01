@@ -14,7 +14,7 @@ Instalacny program by aj mal pridat spustaciu ikonku na plochu.
 V pripade, ze to len rozbalis tak v podadresari `bin` su subory `nbevid.exe` a `nbevid64.exe`. Kedze mate 64bitove Windows a asi aj 64bitovu Javu, tak spustat by sa to malo s `nbevid64.exe`.
 
 
-### Prve spustenie
+## Prve spustenie
 
 Po spusteni sa zobrazi okno aplikacie:
 ![Okno aplikacie]({{ site.baseurl}}public/screenshots/nbevid01.png "Okno aplikacie")
@@ -27,21 +27,35 @@ V zalozke `Settings` je nastavenie `Check Interval`, ktore odporucam zmenit z `E
 
 ![Plugins Settings]({{ site.baseurl}}public/screenshots/nbevid03.png "Plugins Settings")
 
-Kontrola updatv sa da aj vynutit a to bud rychlo v menu `Help->Check for Updates` alebo v menu `Tools->Plugins` zalozka `Updates`, tlacitko `Check for Updates`.
+Kontrola updatov sa da aj vynutit a to bud rychlo v menu `Help->Check for Updates` alebo v menu `Tools->Plugins` zalozka `Updates`, tlacitko `Check for Updates`.
 
-### dokoncit:
-* popis instalacie
-* ako sledovat, nastavit a robit updaty
-* linka/linky na popis jednotlivych verzii, kde je popisane, co sa da robit a co sa robit este neda
 
+## Updatovanie
+
+Pokial program sam detekuje nove updaty, objavi sa v pravom dolnom rohu ikonka zemegule so sipkou:
 ![Notifikacia o updatoch]({{ site.baseurl}}public/screenshots/nbevid16.png "Notifikacia o updatoch")
 
+Ak na nu kliknes, objavi sa bublina s textom o pocte updatov:
 ![Notifikacia o updatoch]({{ site.baseurl}}public/screenshots/nbevid17.png "Notifikacia o updatoch")
 
+Ked kliknes na linku v bubline, objavi sa zoznam updatov:
 ![Okno so zoznamom updatov]({{ site.baseurl}}public/screenshots/nbevid18.png "Okno so zoznamom updatov")
 
+Po stlaceni `Next` sa zobrazi okno s licenciami, kde musis zaskrtnut, ze akceptujes licencie:
 ![Okno s licenciami]({{ site.baseurl}}public/screenshots/nbevid19.png "Okno s licenciami")
+Cely program je v licencii [GPL verzia 2](https://sk.wikipedia.org/wiki/GNU_General_Public_License), co je open source licencia.
 
+
+Na zaver sa zobrazi okno s potvrdenim updatov. Updaty su rozdelene na podpisane (elektronicky) a nepodpisane. Ja zatial updaty nepodpisujem:
 ![Okno s potrvdenim updatov]({{ site.baseurl}}public/screenshots/nbevid20.png "Okno s potrvdenim updatov")
 
+Po nainstalovani sa v pravom dolnom rohu zobrazi zatocena sipka, co znamena, ze program sa potrebuje restartovat, aby sa updaty prejavili. Ked na nu kliknes, objavi sa bublina:
 ![Notifikcia o restarte]({{ site.baseurl}}public/screenshots/nbevid21.png "Notifikcia o restarte")
+
+V bubline je linka, na ktoru ked kliknes, program sa restartuje.
+
+
+## Pouzivanie
+
+Popis pouzivania je v [prirucke](guide). K jednotlivym [verziam](downloads) su linky do blogu, kde popisem, co je v danej verzii nove a co sa zmenilo. Pre prvu pouzitelnu verziu ([0.1.4]({{ site.baseurl }}{% link _posts/2016-10-29-v0.1.4.md %}))
+popisem aj aky pristup som zvolil pri vyvoi a preco toho zatial vie program tak malo.

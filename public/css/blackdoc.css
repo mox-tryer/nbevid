@@ -220,6 +220,18 @@ a.sidebar-nav-item:focus {
 .sidebar-nav-item.active {
   font-weight: bold;
 }
+.sidebar-nav-subitem1 {
+  display: block;
+  line-height: 1.75;
+  text-indent: 1em;
+}
+a.sidebar-nav-subitem1:hover,
+a.sidebar-nav-subitem1:focus {
+  text-decoration: underline;
+}
+.sidebar-nav-subitem1.active {
+  font-weight: bold;
+}
 
 /* Sticky sidebar
  *
