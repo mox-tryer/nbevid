@@ -220,6 +220,7 @@ a.sidebar-nav-item:focus {
 .sidebar-nav-item.active {
   font-weight: bold;
 }
+
 .sidebar-nav-subitem1 {
   display: block;
   line-height: 1.75;
@@ -230,6 +231,19 @@ a.sidebar-nav-subitem1:focus {
   text-decoration: underline;
 }
 .sidebar-nav-subitem1.active {
+  font-weight: bold;
+}
+
+.sidebar-nav-subitem2 {
+  display: block;
+  line-height: 1.75;
+  text-indent: 2em;
+}
+a.sidebar-nav-subitem2:hover,
+a.sidebar-nav-subitem2:focus {
+  text-decoration: underline;
+}
+.sidebar-nav-subitem2.active {
   font-weight: bold;
 }
 

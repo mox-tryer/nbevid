@@ -1,7 +1,7 @@
 ---
 layout: subpage1
 parent: guide/index.md
-title: New Database
+title: Editing
 ---
 
 ### dokoncit

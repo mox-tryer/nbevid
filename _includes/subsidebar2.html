@@ -24,13 +24,11 @@
           {% for subnode1 in pages_list %}
             {% if subnode1.title != null and subnode1.layout == "subpage1" and subnode1.parent == node.path %}
               <a class="sidebar-nav-subitem1{% if page.url == subnode1.url %} active{% endif %}" href="{{ site.baseurl }}{{ subnode1.url  | remove_first: '/' }}">{{ subnode1.title }}</a>
-              {% if page.url == subnode1.url %}
-                {% for subnode2 in pages_list %}
-                  {% if subnode2.title != null and subnode2.layout == "subpage2" and subnode2.parent == subnode1.path %}
-                    <a class="sidebar-nav-subitem2{% if page.url == subnode2.url %} active{% endif %}" href="{{ site.baseurl }}{{ subnode2.url  | remove_first: '/' }}">{{ subnode2.title }}</a>
-                  {% endif %}
-                {% endfor %}
-              {% endif %}
+              {% for subnode2 in pages_list %}
+                {% if subnode2.title != null and subnode2.layout == "subpage2" and subnode2.parent == subnode1.path %}
+                  <a class="sidebar-nav-subitem2{% if page.url == subnode2.url %} active{% endif %}" href="{{ site.baseurl }}{{ subnode2.url  | remove_first: '/' }}">{{ subnode2.title }}</a>
+                {% endif %}
+              {% endfor %}
             {% endif %}
           {% endfor %}
         {% endif %}

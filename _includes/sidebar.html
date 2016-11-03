@@ -23,7 +23,7 @@
           <a class="sidebar-nav-item{% if page.url == node.url %} active{% endif %}" href="{{ site.baseurl }}{{ node.url  | remove_first: '/' }}">{{ node.title }}</a>
           {% if page.url == node.url %}
             {% for subnode in pages_list %}
-              {% if subnode.title != null and subnode.layout == "subpage1" and subnode.parent1 == node.path %}
+              {% if subnode.title != null and subnode.layout == "subpage1" and subnode.parent == node.path %}
                 <a class="sidebar-nav-subitem1{% if page.url == subnode.url %} active{% endif %}" href="{{ site.baseurl }}{{ subnode.url  | remove_first: '/' }}">{{ subnode.title }}</a>
               {% endif %}
             {% endfor %}
