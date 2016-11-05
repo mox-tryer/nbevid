@@ -7,4 +7,4 @@ categories: nbevid version
 
 Vo vsetkych verziach po 0.1.3 vratane tejto je chybajuci modul z platformy. To sposobi, ze po instalacii program nejde spustit. Takze tato verzia je nepouzitelna, takisto ako predchadzajuce. Je potrebne nainstalovat novsiu verziu.
 
-### dokoncit
+To je aj dovod, preco som na stranke s releasmi zmazal vsetky instalacne subory az po verziu [0.1.4]({{ site.baseurl }}{% link _posts/2016-10-29-v0.1.4.md %}).
