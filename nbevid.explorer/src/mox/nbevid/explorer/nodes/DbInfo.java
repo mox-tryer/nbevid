@@ -73,13 +73,23 @@ public class DbInfo extends AbstractSavable {
     return false;
   }
 
-  private void load(char[] password) throws IOException {
+  public void load(char[] password) throws IOException {
     synchronized (dbLock) {
       if (db == null) {
         this.password = new char[password.length];
         System.arraycopy(password, 0, this.password, 0, password.length);
         this.db = SpendingsDbPersister.getDefault().load(dbFile, this.password);
       }
+    }
+  }
+  
+  public void save(SpendingsDatabase db, char[] password) throws IOException {
+    synchronized (dbLock) {
+      this.db = db;
+      this.password = new char[password.length];
+      System.arraycopy(password, 0, this.password, 0, password.length);
+      
+      handleSave();
     }
   }
 

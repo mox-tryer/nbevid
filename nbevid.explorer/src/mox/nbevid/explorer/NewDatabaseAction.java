@@ -11,8 +11,9 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.prefs.BackingStoreException;
 import javax.swing.event.ChangeEvent;
+import mox.nbevid.explorer.nodes.DbInfo;
+import mox.nbevid.explorer.nodes.DbInfoRegistry;
 import mox.nbevid.model.SpendingsDatabase;
-import mox.nbevid.persistence.SpendingsDbPersister;
 import org.netbeans.api.progress.BaseProgressUtils;
 import org.netbeans.api.progress.ProgressHandle;
 import org.openide.DialogDescriptor;
@@ -55,7 +56,9 @@ public final class NewDatabaseAction implements ActionListener {
       BaseProgressUtils.runOffEventThreadWithProgressDialog(() -> {
         try {
           SpendingsDatabase db = new SpendingsDatabase(panel.getDbName());
-          SpendingsDbPersister.getDefault().save(db, panel.getDbFolder(), new char[0]);
+          DbInfo dbInfo = new DbInfo(panel.getDbName(), panel.getDbFolder());
+          dbInfo.save(db, panel.getPassword());
+          DbInfoRegistry.getInstance().put(dbInfo);
           
           EvidPreferences.getInstance().addEvidInstance(db.getName(), panel.getDbFolder().getCanonicalPath());
         } catch (BackingStoreException | IOException ex) {
