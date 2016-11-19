@@ -73,7 +73,7 @@ public class SpendingsDbPersister {
     FileUtil.copyFile(fo, fo.getParent(), fo.getName(), "bak");
   }
   
-  public void save(SpendingsDatabase db, File directory) throws IOException {
+  public void save(SpendingsDatabase db, File directory, char[] password) throws IOException {
     final File mainDbFile = mainDbFile(directory);
     backupFile(mainDbFile);
     
@@ -95,7 +95,7 @@ public class SpendingsDbPersister {
     }
   }
   
-  public SpendingsDatabase load(File directory) throws IOException {
+  public SpendingsDatabase load(File directory, char[] password) throws IOException {
     try (Reader reader = new InputStreamReader(new FileInputStream(mainDbFile(directory)), "UTF-8")) {
       return mapper.readValue(reader, SpendingsDatabaseExt.class).toModel();
     }

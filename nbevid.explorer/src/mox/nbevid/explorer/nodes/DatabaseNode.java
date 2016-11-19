@@ -10,6 +10,7 @@ import java.beans.BeanInfo;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import javax.swing.Action;
@@ -21,10 +22,12 @@ import org.netbeans.core.spi.multiview.MultiViewDescription;
 import org.netbeans.core.spi.multiview.MultiViewFactory;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
+import org.openide.NotifyDescriptor;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 import org.openide.util.HelpCtx;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
@@ -38,26 +41,22 @@ import org.openide.windows.TopComponent;
  * @author martin
  */
 public class DatabaseNode extends AbstractNode implements Lookup.Provider {
-  private final String name;
-  private final File dbDirectory;
-  private final SpendingsDatabase db;
+  private final DbInfo dbInfo;
 
   private static final OpenAction openAction = new OpenAction();
   private static final NewYearAction newYearAction = new NewYearAction();
 
-  private DatabaseNode(String name, File dbDirectory, SpendingsDatabase db, DbInfo dbInfo) {
-    super(Children.create(new YearFactory(db, dbInfo), true), Lookups.fixed(db, dbInfo, new DatabaseEditorCookie()));
-    this.name = name;
-    this.dbDirectory = dbDirectory;
-    this.db = db;
+  private DatabaseNode(DbInfo dbInfo) {
+    super(Children.create(new YearFactory(dbInfo), true), Lookups.fixed(dbInfo, new DatabaseEditorCookie()));
+    this.dbInfo = dbInfo;
 
     setIconBaseWithExtension("mox/nbevid/explorer/resources/db.png");
 
-    setDisplayName(name);
+    setDisplayName(dbInfo.getName());
   }
 
-  public static DatabaseNode create(String name, File dbDirectory, SpendingsDatabase db) {
-    return new DatabaseNode(name, dbDirectory, db, new DbInfo(db, dbDirectory));
+  public static DatabaseNode create(File dbFile) {
+    return new DatabaseNode(DbInfoRegistry.getInstance().findOrCreate(dbFile));
   }
 
   @Override
@@ -71,25 +70,37 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
   }
 
 
-  private static class YearFactory extends ChildFactory<YearInfo> {
-    private final SpendingsDatabase db;
+  private static class YearFactory extends ChildFactory.Detachable<YearInfo> {
     private final DbInfo dbInfo;
 
-    public YearFactory(SpendingsDatabase db, DbInfo dbInfo) {
-      this.db = db;
+    public YearFactory(DbInfo dbInfo) {
       this.dbInfo = dbInfo;
-      db.addYearsChangeListener((e) -> refresh(false));
     }
 
     @Override
     protected boolean createKeys(List<YearInfo> toPopulate) {
-      toPopulate.addAll(db.getYearInfos());
+      toPopulate.addAll(dbInfo.getDb().getYearInfos());
       return true;
     }
 
     @Override
     protected Node createNodeForKey(YearInfo key) {
       return YearNode.create(key, dbInfo);
+    }
+
+    @Override
+    protected void addNotify() {
+      if (!dbInfo.isDbOpened()) {
+        final UnlockDatabasePanel panel = new UnlockDatabasePanel();
+        if (DialogDescriptor.OK_OPTION.equals(DialogDisplayer.getDefault().notify(new DialogDescriptor(panel, Bundle.UnlockDatabasePanel_title())))) {
+          try {
+            dbInfo.load(panel.getPassword());
+            dbInfo.getDb().addYearsChangeListener((e) -> refresh(false));
+          } catch (IOException ex) {
+            DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message(ex, NotifyDescriptor.ERROR_MESSAGE));
+          }
+        }
+      }
     }
   }
 

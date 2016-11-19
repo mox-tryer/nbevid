@@ -8,7 +8,6 @@ package mox.nbevid.explorer;
 
 import mox.nbevid.explorer.nodes.DatabaseNode;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -68,7 +67,7 @@ public class NbEvidExplorerRootNode extends AbstractNode {
         for (EvidPreferences.EvidInstance evidInst : prefs.allEvidInstances()) {
           final File dbDirectory = new File(evidInst.getPath());
           if (dbDirectory.exists() && dbDirectory.isDirectory() && SpendingsDbPersister.getDefault().mainDbFile(dbDirectory).exists()) {
-            keys.add(new RootNodeKey(evidInst.getName(), dbDirectory));
+            keys.add(new RootNodeKey(dbDirectory));
           }
         }
       } catch (BackingStoreException ex) {
@@ -93,26 +92,19 @@ public class NbEvidExplorerRootNode extends AbstractNode {
 
 
   private static class RootNodeKey implements Comparable<RootNodeKey> {
-    private final String name;
     private final File dbDirectory;
 
-    public RootNodeKey(String name, File dbDirectory) {
-      this.name = name;
+    public RootNodeKey(File dbDirectory) {
       this.dbDirectory = dbDirectory;
     }
 
     private Node getRootNode() {
-      try {
-        return DatabaseNode.create(name, dbDirectory, SpendingsDbPersister.getDefault().load(dbDirectory));
-      } catch (IOException ex) {
-        Exceptions.printStackTrace(ex);
-        return null;
-      }
+      return DatabaseNode.create(dbDirectory);
     }
 
     @Override
     public int compareTo(RootNodeKey o) {
-      return name.compareTo(o.name);
+      return dbDirectory.compareTo(o.dbDirectory);
     }
 
     @Override

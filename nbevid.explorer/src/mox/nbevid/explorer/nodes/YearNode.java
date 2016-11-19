@@ -77,7 +77,7 @@ public class YearNode extends AbstractNode implements Lookup.Provider {
       synchronized (yearLock) {
         Year year;
         if (!yearInfo.isLoaded()) {
-          year = SpendingsDbPersister.getDefault().load(dbInfo.getDbDirectory(), yearInfo);
+          year = SpendingsDbPersister.getDefault().load(dbInfo.getDbFile(), yearInfo);
           yearInfo.getDb().addLoadedYear(year);
         } else {
           year = yearInfo.get();

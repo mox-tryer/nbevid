@@ -19,24 +19,51 @@ import org.netbeans.spi.actions.AbstractSavable;
  * @author martin
  */
 public class DbInfo extends AbstractSavable {
-  private final SpendingsDatabase db;
-  private final File dbDirectory;
+  private final String name;
+  private final File dbFile;
+  
+  private final Object dbLock = new Object();
+  private SpendingsDatabase db;
+  private char[] password;
 
-  public DbInfo(SpendingsDatabase db, File dbDirectory) {
-    this.db = db;
-    this.dbDirectory = dbDirectory;
+  public DbInfo(String name, File dbDirectory) {
+    this.name = name;
+    this.dbFile = dbDirectory;
+    this.db = null;
   }
   
   public void dbChanged() {
     register();
   }
 
-  public SpendingsDatabase getDb() {
-    return db;
+  public String getName() {
+    return name;
   }
 
-  public File getDbDirectory() {
-    return dbDirectory;
+  public SpendingsDatabase getDb() {
+    synchronized (dbLock) {
+      return db;
+    }
+  }
+  
+  public boolean isDbOpened() {
+    synchronized (dbLock) {
+      return db != null;
+    }
+  }
+  
+  public void load(char[] password) throws IOException {
+    synchronized (dbLock) {
+      if (db == null) {
+        this.password = new char[password.length];
+        System.arraycopy(password, 0, this.password, 0, password.length);
+        this.db = SpendingsDbPersister.getDefault().load(dbFile, this.password);
+      }
+    }
+  }
+
+  public File getDbFile() {
+    return dbFile;
   }
 
   @Override
@@ -46,13 +73,15 @@ public class DbInfo extends AbstractSavable {
 
   @Override
   protected void handleSave() throws IOException {
-    SpendingsDbPersister.getDefault().save(db, dbDirectory);
+    synchronized (dbLock) {
+      SpendingsDbPersister.getDefault().save(db, dbFile, password);
+    }
   }
 
   @Override
   public int hashCode() {
     int hash = 7;
-    hash = 17 * hash + Objects.hashCode(this.dbDirectory);
+    hash = 17 * hash + Objects.hashCode(this.dbFile);
     return hash;
   }
 
@@ -68,6 +97,6 @@ public class DbInfo extends AbstractSavable {
       return false;
     }
     final DbInfo other = (DbInfo) obj;
-    return Objects.equals(this.dbDirectory, other.dbDirectory);
+    return Objects.equals(this.dbFile, other.dbFile);
   }
 }

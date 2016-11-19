@@ -8,10 +8,11 @@ package mox.nbevid.explorer;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.util.prefs.BackingStoreException;
-import mox.nbevid.model.SpendingsDatabase;
-import mox.nbevid.persistence.SpendingsDbPersister;
+import mox.nbevid.explorer.nodes.DbInfo;
+import mox.nbevid.explorer.nodes.DbInfoRegistry;
 import org.netbeans.api.progress.BaseProgressUtils;
 import org.netbeans.api.progress.ProgressHandle;
 import org.openide.DialogDescriptor;
@@ -21,6 +22,7 @@ import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionRegistration;
+import org.openide.filesystems.FileUtil;
 import org.openide.util.Exceptions;
 import org.openide.util.NbBundle.Messages;
 
@@ -55,10 +57,16 @@ public final class OpenDatabaseAction implements ActionListener {
             DialogDisplayer.getDefault().notifyLater(new NotifyDescriptor.Message(Bundle.MSG_AlreadyOpened(), NotifyDescriptor.Message.ERROR_MESSAGE));
             return;
           }
-
-          SpendingsDatabase db = SpendingsDbPersister.getDefault().load(panel.getDbFolder());
           
-          EvidPreferences.getInstance().addEvidInstance(db.getName(), panel.getDbFolder().getCanonicalPath());
+          File dbFile = panel.getDbFolder().getCanonicalFile();
+          String name = FileUtil.toFileObject(dbFile).getName();
+
+          DbInfo dbInfo = new DbInfo(name, dbFile);
+          dbInfo.load(panel.getPassword());
+          
+          DbInfoRegistry.getInstance().put(dbInfo);
+          
+          EvidPreferences.getInstance().addEvidInstance(name, dbFile.getAbsolutePath());
         } catch (BackingStoreException | IOException ex) {
           NotifyDescriptor.Message msg = new NotifyDescriptor.Message(Bundle.MSG_ErrorOpeningDb(), NotifyDescriptor.ERROR_MESSAGE);
           DialogDisplayer.getDefault().notifyLater(msg);

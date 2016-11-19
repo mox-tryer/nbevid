@@ -55,7 +55,7 @@ public final class NewDatabaseAction implements ActionListener {
       BaseProgressUtils.runOffEventThreadWithProgressDialog(() -> {
         try {
           SpendingsDatabase db = new SpendingsDatabase(panel.getDbName());
-          SpendingsDbPersister.getDefault().save(db, panel.getDbFolder());
+          SpendingsDbPersister.getDefault().save(db, panel.getDbFolder(), new char[0]);
           
           EvidPreferences.getInstance().addEvidInstance(db.getName(), panel.getDbFolder().getCanonicalPath());
         } catch (BackingStoreException | IOException ex) {
