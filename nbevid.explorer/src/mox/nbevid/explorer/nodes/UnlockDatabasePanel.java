@@ -13,7 +13,7 @@ import org.openide.util.NbBundle;
  *
  * @author martin
  */
-@NbBundle.Messages({"UnlockDatabasePanel.title=Unlock Database"})
+@NbBundle.Messages({"UnlockDatabasePanel.title=Unlock Database", "UnlockDatabasePanel.message.error=Error unlocking database"})
 public class UnlockDatabasePanel extends javax.swing.JPanel {
   private static final long serialVersionUID = -3297443481217287855L;
 

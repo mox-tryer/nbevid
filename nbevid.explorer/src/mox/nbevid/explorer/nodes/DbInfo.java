@@ -12,6 +12,9 @@ import java.util.Objects;
 import mox.nbevid.model.SpendingsDatabase;
 import mox.nbevid.persistence.SpendingsDbPersister;
 import org.netbeans.spi.actions.AbstractSavable;
+import org.openide.DialogDescriptor;
+import org.openide.DialogDisplayer;
+import org.openide.NotifyDescriptor;
 
 
 /**
@@ -21,7 +24,7 @@ import org.netbeans.spi.actions.AbstractSavable;
 public class DbInfo extends AbstractSavable {
   private final String name;
   private final File dbFile;
-  
+
   private final Object dbLock = new Object();
   private SpendingsDatabase db;
   private char[] password;
@@ -31,7 +34,7 @@ public class DbInfo extends AbstractSavable {
     this.dbFile = dbDirectory;
     this.db = null;
   }
-  
+
   public void dbChanged() {
     register();
   }
@@ -45,14 +48,32 @@ public class DbInfo extends AbstractSavable {
       return db;
     }
   }
-  
+
   public boolean isDbOpened() {
     synchronized (dbLock) {
       return db != null;
     }
   }
-  
-  public void load(char[] password) throws IOException {
+
+  public boolean load() {
+    if (isDbOpened()) {
+      return true;
+    }
+
+    final UnlockDatabasePanel panel = new UnlockDatabasePanel();
+    if (DialogDescriptor.OK_OPTION.equals(DialogDisplayer.getDefault().notify(new DialogDescriptor(panel, Bundle.UnlockDatabasePanel_title())))) {
+      try {
+        load(panel.getPassword());
+        return true;
+      } catch (IOException ex) {
+        DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message(Bundle.UnlockDatabasePanel_message_error(), NotifyDescriptor.ERROR_MESSAGE));
+      }
+    }
+    
+    return false;
+  }
+
+  private void load(char[] password) throws IOException {
     synchronized (dbLock) {
       if (db == null) {
         this.password = new char[password.length];

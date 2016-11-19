@@ -10,7 +10,6 @@ import java.beans.BeanInfo;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import javax.swing.Action;
@@ -22,12 +21,10 @@ import org.netbeans.core.spi.multiview.MultiViewDescription;
 import org.netbeans.core.spi.multiview.MultiViewFactory;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
-import org.openide.NotifyDescriptor;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
-import org.openide.util.Exceptions;
 import org.openide.util.HelpCtx;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
@@ -91,15 +88,8 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
     @Override
     protected void addNotify() {
       if (!dbInfo.isDbOpened()) {
-        final UnlockDatabasePanel panel = new UnlockDatabasePanel();
-        if (DialogDescriptor.OK_OPTION.equals(DialogDisplayer.getDefault().notify(new DialogDescriptor(panel, Bundle.UnlockDatabasePanel_title())))) {
-          try {
-            dbInfo.load(panel.getPassword());
-            dbInfo.getDb().addYearsChangeListener((e) -> refresh(false));
-          } catch (IOException ex) {
-            DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message(ex, NotifyDescriptor.ERROR_MESSAGE));
-          }
-        }
+        dbInfo.load();
+        dbInfo.getDb().addYearsChangeListener((e) -> refresh(false));
       }
     }
   }
@@ -122,8 +112,15 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
     @Override
     protected void performAction(Node[] activatedNodes) {
       for (Node node : activatedNodes) {
-        final SpendingsDatabase db = node.getLookup().lookup(SpendingsDatabase.class);
         final DbInfo dbInfo = node.getLookup().lookup(DbInfo.class);
+        
+        if (!dbInfo.isDbOpened()) {
+          if (!dbInfo.load()) {
+            return;
+          }
+        }
+        
+        final SpendingsDatabase db = dbInfo.getDb();
 
         int proposedYear = LocalDate.now().getYear();
         for (YearInfo yi : db.getYearInfos()) {
@@ -150,10 +147,6 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
       }
 
       for (Node node : activatedNodes) {
-        if (node.getLookup().lookup(SpendingsDatabase.class) == null) {
-          return false;
-        }
-
         if (node.getLookup().lookup(DbInfo.class) == null) {
           return false;
         }
@@ -224,11 +217,16 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
     @Override
     protected void performAction(Node[] activatedNodes) {
       for (Node node : activatedNodes) {
-        final SpendingsDatabase db = node.getLookup().lookup(SpendingsDatabase.class);
         final DbInfo dbInfo = node.getLookup().lookup(DbInfo.class);
         final DatabaseEditorCookie editorCookie = node.getLookup().lookup(DatabaseEditorCookie.class);
         
-        editorCookie.openEditor(node, db, dbInfo);
+        if (!dbInfo.isDbOpened()) {
+          if (!dbInfo.load()) {
+            return;
+          }
+        }
+        
+        editorCookie.openEditor(node, dbInfo.getDb(), dbInfo);
       }
     }
 
@@ -239,10 +237,6 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
       }
 
       for (Node node : activatedNodes) {
-        if (node.getLookup().lookup(SpendingsDatabase.class) == null) {
-          return false;
-        }
-
         if (node.getLookup().lookup(DbInfo.class) == null) {
           return false;
         }
