@@ -75,7 +75,9 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
 
     @Override
     protected boolean createKeys(List<Integer> toPopulate) {
-      toPopulate.addAll(dbInfo.getDb().getYearKeys());
+      if (dbInfo.getDb() != null) {
+        toPopulate.addAll(dbInfo.getDb().getYearKeys());
+      }
       return true;
     }
 
@@ -89,7 +91,9 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
       if (!dbInfo.isDbOpened()) {
         dbInfo.load();
       }
-      dbInfo.getDb().addYearsChangeListener((e) -> refresh(false));
+      if (dbInfo.getDb() != null) {
+        dbInfo.getDb().addYearsChangeListener((e) -> refresh(false));
+      }
     }
   }
 
