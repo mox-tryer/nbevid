@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import mox.nbevid.model.Item;
 import mox.nbevid.model.SpendingsDatabase;
-import mox.nbevid.model.YearInfo;
+import mox.nbevid.model.Year;
 
 
 /**
@@ -22,14 +22,14 @@ public class SpendingsDatabaseExt {
   private String name;
   private List<ItemExt> items = new ArrayList<>();
   private List<Integer> lastYearItems = new ArrayList<>();
-  private List<YearInfoExt> yearInfos = new ArrayList<>();
+  private List<YearExt> years = new ArrayList<>();
 
   public static SpendingsDatabaseExt createFromModel(SpendingsDatabase db) {
     SpendingsDatabaseExt tmp = new SpendingsDatabaseExt();
     tmp.setName(db.getName());
     tmp.setItems(createItemListExt(db.getAllItems()));
     tmp.setLastYearItems(createLastYearItemsListExt(db.getLastYearItems()));
-    tmp.setYearInfos(createYearInfoListExt(db.getYearInfos()));
+    tmp.setYears(createYearListExt(db.getYears()));
     return tmp;
   }
   
@@ -50,10 +50,10 @@ public class SpendingsDatabaseExt {
     return list;
   }
 
-  private static List<YearInfoExt> createYearInfoListExt(List<YearInfo> yearInfos) {
-    ArrayList<YearInfoExt> exts = new ArrayList<>();
-    for (YearInfo info : yearInfos) {
-      exts.add(YearInfoExt.createFromModel(info));
+  private static List<YearExt> createYearListExt(Map<Integer, Year> years) {
+    ArrayList<YearExt> exts = new ArrayList<>();
+    for (Year year : years.values()) {
+      exts.add(YearExt.createFromModel(year));
     }
     exts.sort(null);
     return exts;
@@ -83,12 +83,12 @@ public class SpendingsDatabaseExt {
     this.lastYearItems = lastYearItems;
   }
 
-  public List<YearInfoExt> getYearInfos() {
-    return yearInfos;
+  public List<YearExt> getYears() {
+    return years;
   }
 
-  public void setYearInfos(List<YearInfoExt> yearInfos) {
-    this.yearInfos = yearInfos;
+  public void setYears(List<YearExt> years) {
+    this.years = years;
   }
 
   public SpendingsDatabase toModel() {
@@ -97,8 +97,8 @@ public class SpendingsDatabaseExt {
       db.addItem(ext.toModel());
     }
     db.setLastYearItemIds(lastYearItems);
-    for (YearInfoExt ext : yearInfos) {
-      db.addYearInfo(ext.toModel(db));
+    for (YearExt ext : years) {
+      db.addYear(ext.toModel(db));
     }
     return db;
   }

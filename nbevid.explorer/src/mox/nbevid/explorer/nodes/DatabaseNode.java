@@ -16,7 +16,6 @@ import javax.swing.Action;
 import mox.nbevid.explorer.editors.DbItemsEditorPanel;
 import mox.nbevid.model.SpendingsDatabase;
 import mox.nbevid.model.Year;
-import mox.nbevid.model.YearInfo;
 import org.netbeans.core.spi.multiview.MultiViewDescription;
 import org.netbeans.core.spi.multiview.MultiViewFactory;
 import org.openide.DialogDescriptor;
@@ -67,7 +66,7 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
   }
 
 
-  private static class YearFactory extends ChildFactory.Detachable<YearInfo> {
+  private static class YearFactory extends ChildFactory.Detachable<Integer> {
     private final DbInfo dbInfo;
 
     public YearFactory(DbInfo dbInfo) {
@@ -75,13 +74,13 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
     }
 
     @Override
-    protected boolean createKeys(List<YearInfo> toPopulate) {
-      toPopulate.addAll(dbInfo.getDb().getYearInfos());
+    protected boolean createKeys(List<Integer> toPopulate) {
+      toPopulate.addAll(dbInfo.getDb().getYearKeys());
       return true;
     }
 
     @Override
-    protected Node createNodeForKey(YearInfo key) {
+    protected Node createNodeForKey(Integer key) {
       return YearNode.create(key, dbInfo);
     }
 
@@ -89,8 +88,8 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
     protected void addNotify() {
       if (!dbInfo.isDbOpened()) {
         dbInfo.load();
-        dbInfo.getDb().addYearsChangeListener((e) -> refresh(false));
       }
+      dbInfo.getDb().addYearsChangeListener((e) -> refresh(false));
     }
   }
 
@@ -123,8 +122,8 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
         final SpendingsDatabase db = dbInfo.getDb();
 
         int proposedYear = LocalDate.now().getYear();
-        for (YearInfo yi : db.getYearInfos()) {
-          if (yi.getYear() == proposedYear) {
+        for (int yi : db.getYearKeys()) {
+          if (yi == proposedYear) {
             proposedYear++;
           }
         }

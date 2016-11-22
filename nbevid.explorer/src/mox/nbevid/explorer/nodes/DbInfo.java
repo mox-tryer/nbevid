@@ -10,11 +10,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 import mox.nbevid.model.SpendingsDatabase;
+import mox.nbevid.persistence.PersisterException;
 import mox.nbevid.persistence.SpendingsDbPersister;
 import org.netbeans.spi.actions.AbstractSavable;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
+import org.openide.filesystems.FileUtil;
 
 
 /**
@@ -29,9 +31,9 @@ public class DbInfo extends AbstractSavable {
   private SpendingsDatabase db;
   private char[] password;
 
-  public DbInfo(String name, File dbDirectory) {
-    this.name = name;
-    this.dbFile = dbDirectory;
+  public DbInfo(File dbFile) {
+    this.name = FileUtil.toFileObject(dbFile).getName();
+    this.dbFile = dbFile;
     this.db = null;
   }
 
@@ -65,7 +67,7 @@ public class DbInfo extends AbstractSavable {
       try {
         load(panel.getPassword());
         return true;
-      } catch (IOException ex) {
+      } catch (PersisterException ex) {
         DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message(Bundle.UnlockDatabasePanel_message_error(), NotifyDescriptor.ERROR_MESSAGE));
       }
     }
@@ -73,7 +75,7 @@ public class DbInfo extends AbstractSavable {
     return false;
   }
 
-  public void load(char[] password) throws IOException {
+  public void load(char[] password) throws PersisterException {
     synchronized (dbLock) {
       if (db == null) {
         this.password = new char[password.length];
@@ -105,7 +107,15 @@ public class DbInfo extends AbstractSavable {
   @Override
   protected void handleSave() throws IOException {
     synchronized (dbLock) {
-      SpendingsDbPersister.getDefault().save(db, dbFile, password);
+      try {
+        SpendingsDbPersister.getDefault().save(db, dbFile, password);
+      } catch (PersisterException ex) {
+        if (ex.getCause() instanceof IOException) {
+          throw (IOException) ex.getCause();
+        } else {
+          throw new IOException(ex);
+        }
+      }
     }
   }
 

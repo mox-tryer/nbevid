@@ -7,12 +7,15 @@ package mox.nbevid.explorer;
 
 
 import java.io.File;
-import javax.swing.JFileChooser;
+import java.io.IOException;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import mox.nbevid.persistence.SpendingsDbPersister;
+import org.openide.filesystems.FileChooserBuilder;
 import org.openide.util.ChangeSupport;
+import org.openide.util.Exceptions;
+import org.openide.util.NbBundle;
 
 
 /**
@@ -46,7 +49,7 @@ public class OpenDatabasePanel extends javax.swing.JPanel {
       }
     };
     
-    dbFolderTextField.getDocument().addDocumentListener(docListener);
+    dbFileTextField.getDocument().addDocumentListener(docListener);
   }
   
   public void addChangeListener(ChangeListener l) {
@@ -58,23 +61,16 @@ public class OpenDatabasePanel extends javax.swing.JPanel {
   }
   
   public boolean validateValues() {
-    if (dbFolderTextField.getText().isEmpty()) {
+    if (dbFileTextField.getText().isEmpty()) {
       return false;
     }
     
-    File dbFolder = new File(dbFolderTextField.getText());
-    if (!dbFolder.exists()) {
-      return false;
-    }
-    if (!dbFolder.isDirectory()) {
-      return false;
-    }
-    
-    return SpendingsDbPersister.getDefault().mainDbFile(dbFolder).exists();
+    File dbFile = new File(dbFileTextField.getText());
+    return dbFile.exists() && dbFile.isFile();
   }
   
-  public File getDbFolder() {
-    return new File(dbFolderTextField.getText());
+  public File getDbFile() {
+    return new File(dbFileTextField.getText());
   }
   
   public char[] getPassword() {
@@ -90,14 +86,14 @@ public class OpenDatabasePanel extends javax.swing.JPanel {
   private void initComponents() {
 
     dbFolderLabel = new javax.swing.JLabel();
-    dbFolderTextField = new javax.swing.JTextField();
+    dbFileTextField = new javax.swing.JTextField();
     dbFolderChooseButton = new javax.swing.JButton();
     passwordLabel = new javax.swing.JLabel();
     passwordField = new javax.swing.JPasswordField();
 
     org.openide.awt.Mnemonics.setLocalizedText(dbFolderLabel, org.openide.util.NbBundle.getMessage(OpenDatabasePanel.class, "OpenDatabasePanel.dbFolderLabel.text", new Object[] {})); // NOI18N
 
-    dbFolderTextField.setText(org.openide.util.NbBundle.getMessage(OpenDatabasePanel.class, "OpenDatabasePanel.dbFolderTextField.text", new Object[] {})); // NOI18N
+    dbFileTextField.setText(org.openide.util.NbBundle.getMessage(OpenDatabasePanel.class, "OpenDatabasePanel.dbFileTextField.text", new Object[] {})); // NOI18N
 
     org.openide.awt.Mnemonics.setLocalizedText(dbFolderChooseButton, org.openide.util.NbBundle.getMessage(OpenDatabasePanel.class, "OpenDatabasePanel.dbFolderChooseButton.text", new Object[] {})); // NOI18N
     dbFolderChooseButton.addActionListener(new java.awt.event.ActionListener() {
@@ -123,7 +119,7 @@ public class OpenDatabasePanel extends javax.swing.JPanel {
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
           .addComponent(passwordField, javax.swing.GroupLayout.DEFAULT_SIZE, 206, Short.MAX_VALUE)
-          .addComponent(dbFolderTextField))
+          .addComponent(dbFileTextField))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
         .addComponent(dbFolderChooseButton)
         .addContainerGap())
@@ -134,7 +130,7 @@ public class OpenDatabasePanel extends javax.swing.JPanel {
         .addContainerGap()
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
           .addComponent(dbFolderLabel)
-          .addComponent(dbFolderTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+          .addComponent(dbFileTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
           .addComponent(dbFolderChooseButton))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -144,20 +140,33 @@ public class OpenDatabasePanel extends javax.swing.JPanel {
     );
   }// </editor-fold>//GEN-END:initComponents
 
+  @NbBundle.Messages({
+    "OpenDatabasePanel.fileChoose.title=Open Database",
+    "OpenDatabasePanel.fileChoose.approve=Open"
+  })
   private void dbFolderChooseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dbFolderChooseButtonActionPerformed
-    JFileChooser chooser = new JFileChooser();
-    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-    int result = chooser.showDialog(this, Bundle.CTL_SelectFolder());
-    if (result == JFileChooser.APPROVE_OPTION) {
-      dbFolderTextField.setText(chooser.getSelectedFile().getAbsolutePath());
+    File f = new FileChooserBuilder(OpenDatabasePanel.class)
+            .setTitle(Bundle.OpenDatabasePanel_fileChoose_title())
+            .setApproveText(Bundle.OpenDatabasePanel_fileChoose_approve())
+            .setDefaultWorkingDirectory(new File(System.getProperty("user.home")))
+            .setFilesOnly(true)
+            .setFileFilter(SpendingsDbPersister.getFileFilter())
+            .showOpenDialog();
+    
+    if (f != null) {
+      try {
+        dbFileTextField.setText(f.getCanonicalPath());
+      } catch (IOException ex) {
+        Exceptions.printStackTrace(ex);
+      }
     }
   }//GEN-LAST:event_dbFolderChooseButtonActionPerformed
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JTextField dbFileTextField;
   private javax.swing.JButton dbFolderChooseButton;
   private javax.swing.JLabel dbFolderLabel;
-  private javax.swing.JTextField dbFolderTextField;
   private javax.swing.JPasswordField passwordField;
   private javax.swing.JLabel passwordLabel;
   // End of variables declaration//GEN-END:variables

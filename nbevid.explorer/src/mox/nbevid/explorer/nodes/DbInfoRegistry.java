@@ -8,8 +8,6 @@ package mox.nbevid.explorer.nodes;
 
 import java.io.File;
 import java.util.HashMap;
-import org.openide.filesystems.FileObject;
-import org.openide.filesystems.FileUtil;
 
 
 /**
@@ -34,8 +32,7 @@ public class DbInfoRegistry {
       final String path = dbFile.getAbsolutePath();
       DbInfo db = dbInfos.get(path);
       if (db == null) {
-        FileObject fo = FileUtil.toFileObject(dbFile);
-        db = new DbInfo(fo.getName(), dbFile);
+        db = new DbInfo(dbFile);
         dbInfos.put(path, db);
       }
       return db;

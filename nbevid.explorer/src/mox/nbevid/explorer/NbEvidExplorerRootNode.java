@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.prefs.BackingStoreException;
 import javax.swing.event.ChangeEvent;
-import mox.nbevid.persistence.SpendingsDbPersister;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Children;
@@ -65,10 +64,8 @@ public class NbEvidExplorerRootNode extends AbstractNode {
       ArrayList<RootNodeKey> keys = new ArrayList<>();
       try {
         for (EvidPreferences.EvidInstance evidInst : prefs.allEvidInstances()) {
-          final File dbDirectory = new File(evidInst.getPath());
-          if (dbDirectory.exists() && dbDirectory.isDirectory() && SpendingsDbPersister.getDefault().mainDbFile(dbDirectory).exists()) {
-            keys.add(new RootNodeKey(dbDirectory));
-          }
+          final File dbFile = new File(evidInst.getPath());
+          keys.add(new RootNodeKey(dbFile));
         }
       } catch (BackingStoreException ex) {
         Exceptions.printStackTrace(ex);

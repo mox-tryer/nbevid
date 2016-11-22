@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.prefs.BackingStoreException;
 import mox.nbevid.explorer.nodes.DbInfo;
 import mox.nbevid.explorer.nodes.DbInfoRegistry;
+import mox.nbevid.persistence.PersisterException;
 import org.netbeans.api.progress.BaseProgressUtils;
 import org.netbeans.api.progress.ProgressHandle;
 import org.openide.DialogDescriptor;
@@ -53,21 +54,21 @@ public final class OpenDatabaseAction implements ActionListener {
       final ProgressHandle progress = ProgressHandle.createHandle(Bundle.MSG_OpeningDb());
       BaseProgressUtils.runOffEventThreadWithProgressDialog(() -> {
         try {
-          if (EvidPreferences.getInstance().hasEvidInstance(panel.getDbFolder().getCanonicalPath())) {
+          if (EvidPreferences.getInstance().hasEvidInstance(panel.getDbFile().getCanonicalPath())) {
             DialogDisplayer.getDefault().notifyLater(new NotifyDescriptor.Message(Bundle.MSG_AlreadyOpened(), NotifyDescriptor.Message.ERROR_MESSAGE));
             return;
           }
           
-          File dbFile = panel.getDbFolder().getCanonicalFile();
+          File dbFile = panel.getDbFile().getCanonicalFile();
           String name = FileUtil.toFileObject(dbFile).getName();
 
-          DbInfo dbInfo = new DbInfo(name, dbFile);
+          DbInfo dbInfo = new DbInfo(dbFile);
           dbInfo.load(panel.getPassword());
           
           DbInfoRegistry.getInstance().put(dbInfo);
           
           EvidPreferences.getInstance().addEvidInstance(name, dbFile.getAbsolutePath());
-        } catch (BackingStoreException | IOException ex) {
+        } catch (BackingStoreException | IOException | PersisterException ex) {
           NotifyDescriptor.Message msg = new NotifyDescriptor.Message(Bundle.MSG_ErrorOpeningDb(), NotifyDescriptor.ERROR_MESSAGE);
           DialogDisplayer.getDefault().notifyLater(msg);
           Exceptions.printStackTrace(ex);
