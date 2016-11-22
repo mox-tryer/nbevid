@@ -7,11 +7,13 @@ package mox.nbevid.explorer;
 
 
 import java.io.File;
-import javax.swing.JFileChooser;
+import java.io.IOException;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import org.openide.filesystems.FileChooserBuilder;
 import org.openide.util.ChangeSupport;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 
@@ -164,12 +166,24 @@ public class NewDatabasePanel extends javax.swing.JPanel {
     );
   }// </editor-fold>//GEN-END:initComponents
 
+  @NbBundle.Messages({
+    "NewDatabasePanel.fileChoose.title=New Database Folder",
+    "NewDatabasePanel.fileChoose.approve=Select"
+  })
   private void dbFolderChooseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dbFolderChooseButtonActionPerformed
-    JFileChooser chooser = new JFileChooser();
-    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-    int result = chooser.showDialog(this, Bundle.CTL_SelectFolder());
-    if (result == JFileChooser.APPROVE_OPTION) {
-      dbFolderTextField.setText(chooser.getSelectedFile().getAbsolutePath());
+    File f = new FileChooserBuilder(NewDatabasePanel.class)
+            .setTitle(Bundle.NewDatabasePanel_fileChoose_title())
+            .setApproveText(Bundle.NewDatabasePanel_fileChoose_approve())
+            .setDefaultWorkingDirectory(new File(System.getProperty("user.home")))
+            .setDirectoriesOnly(true)
+            .showOpenDialog();
+    
+    if (f != null) {
+      try {
+        dbFolderTextField.setText(f.getCanonicalPath());
+      } catch (IOException ex) {
+        Exceptions.printStackTrace(ex);
+      }
     }
   }//GEN-LAST:event_dbFolderChooseButtonActionPerformed
 
