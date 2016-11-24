@@ -8,7 +8,6 @@ package mox.nbevid.model;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -106,9 +105,5 @@ public class Year {
   @Override
   public String toString() {
     return "Year{" + "year=" + year + '}';
-  }
-
-  YearInfo createYearInfo() {
-    return new YearInfo(db, year);
   }
 }

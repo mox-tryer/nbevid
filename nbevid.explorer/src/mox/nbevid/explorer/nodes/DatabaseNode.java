@@ -12,15 +12,19 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.prefs.BackingStoreException;
 import javax.swing.Action;
+import static javax.swing.Action.NAME;
+import mox.nbevid.explorer.EvidPreferences;
+import mox.nbevid.explorer.PasswordPanel;
 import mox.nbevid.explorer.editors.DbItemsEditorPanel;
 import mox.nbevid.model.SpendingsDatabase;
 import mox.nbevid.model.Year;
-import mox.nbevid.model.YearInfo;
 import org.netbeans.core.spi.multiview.MultiViewDescription;
 import org.netbeans.core.spi.multiview.MultiViewFactory;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
+import org.openide.NotifyDescriptor;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Children;
@@ -38,26 +42,24 @@ import org.openide.windows.TopComponent;
  * @author martin
  */
 public class DatabaseNode extends AbstractNode implements Lookup.Provider {
-  private final String name;
-  private final File dbDirectory;
-  private final SpendingsDatabase db;
+  private final DbInfo dbInfo;
 
   private static final OpenAction openAction = new OpenAction();
+  private static final CloseAction closeAction = new CloseAction();
+  private static final ChangePasswordAction changePasswordAction = new ChangePasswordAction();
   private static final NewYearAction newYearAction = new NewYearAction();
 
-  private DatabaseNode(String name, File dbDirectory, SpendingsDatabase db, DbInfo dbInfo) {
-    super(Children.create(new YearFactory(db, dbInfo), true), Lookups.fixed(db, dbInfo, new DatabaseEditorCookie()));
-    this.name = name;
-    this.dbDirectory = dbDirectory;
-    this.db = db;
+  private DatabaseNode(DbInfo dbInfo) {
+    super(Children.create(new YearFactory(dbInfo), true), Lookups.fixed(dbInfo, new DatabaseEditorCookie()));
+    this.dbInfo = dbInfo;
 
     setIconBaseWithExtension("mox/nbevid/explorer/resources/db.png");
 
-    setDisplayName(name);
+    setDisplayName(dbInfo.getName());
   }
 
-  public static DatabaseNode create(String name, File dbDirectory, SpendingsDatabase db) {
-    return new DatabaseNode(name, dbDirectory, db, new DbInfo(db, dbDirectory));
+  public static DatabaseNode create(File dbFile) {
+    return new DatabaseNode(DbInfoRegistry.getInstance().findOrCreate(dbFile));
   }
 
   @Override
@@ -67,29 +69,39 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
 
   @Override
   public Action[] getActions(boolean context) {
-    return new Action[] {getPreferredAction(), null, newYearAction};
+    return new Action[] {getPreferredAction(), closeAction, changePasswordAction, null, newYearAction};
   }
 
 
-  private static class YearFactory extends ChildFactory<YearInfo> {
-    private final SpendingsDatabase db;
+  private static class YearFactory extends ChildFactory.Detachable<Integer> {
     private final DbInfo dbInfo;
 
-    public YearFactory(SpendingsDatabase db, DbInfo dbInfo) {
-      this.db = db;
+    public YearFactory(DbInfo dbInfo) {
       this.dbInfo = dbInfo;
-      db.addYearsChangeListener((e) -> refresh(false));
     }
 
     @Override
-    protected boolean createKeys(List<YearInfo> toPopulate) {
-      toPopulate.addAll(db.getYearInfos());
+    protected boolean createKeys(List<Integer> toPopulate) {
+      if (dbInfo.getDb() != null) {
+        toPopulate.addAll(dbInfo.getDb().getYearKeys());
+      }
       return true;
     }
 
     @Override
-    protected Node createNodeForKey(YearInfo key) {
+    protected Node createNodeForKey(Integer key) {
       return YearNode.create(key, dbInfo);
+    }
+
+    @Override
+    protected void addNotify() {
+      if (!dbInfo.isDbOpened()) {
+        dbInfo.load();
+      }
+      if (dbInfo.getDb() != null) {
+        dbInfo.getDb().addYearsChangeListener((e) -> refresh(false));
+      }
+      dbInfo.addDbOpenChangeListener((e) -> refresh(false));
     }
   }
 
@@ -111,12 +123,19 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
     @Override
     protected void performAction(Node[] activatedNodes) {
       for (Node node : activatedNodes) {
-        final SpendingsDatabase db = node.getLookup().lookup(SpendingsDatabase.class);
         final DbInfo dbInfo = node.getLookup().lookup(DbInfo.class);
+        
+        if (!dbInfo.isDbOpened()) {
+          if (!dbInfo.load()) {
+            return;
+          }
+        }
+        
+        final SpendingsDatabase db = dbInfo.getDb();
 
         int proposedYear = LocalDate.now().getYear();
-        for (YearInfo yi : db.getYearInfos()) {
-          if (yi.getYear() == proposedYear) {
+        for (int yi : db.getYearKeys()) {
+          if (yi == proposedYear) {
             proposedYear++;
           }
         }
@@ -139,10 +158,6 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
       }
 
       for (Node node : activatedNodes) {
-        if (node.getLookup().lookup(SpendingsDatabase.class) == null) {
-          return false;
-        }
-
         if (node.getLookup().lookup(DbInfo.class) == null) {
           return false;
         }
@@ -213,11 +228,16 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
     @Override
     protected void performAction(Node[] activatedNodes) {
       for (Node node : activatedNodes) {
-        final SpendingsDatabase db = node.getLookup().lookup(SpendingsDatabase.class);
         final DbInfo dbInfo = node.getLookup().lookup(DbInfo.class);
         final DatabaseEditorCookie editorCookie = node.getLookup().lookup(DatabaseEditorCookie.class);
         
-        editorCookie.openEditor(node, db, dbInfo);
+        if (!dbInfo.isDbOpened()) {
+          if (!dbInfo.load()) {
+            return;
+          }
+        }
+        
+        editorCookie.openEditor(node, dbInfo.getDb(), dbInfo);
       }
     }
 
@@ -228,10 +248,6 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
       }
 
       for (Node node : activatedNodes) {
-        if (node.getLookup().lookup(SpendingsDatabase.class) == null) {
-          return false;
-        }
-
         if (node.getLookup().lookup(DbInfo.class) == null) {
           return false;
         }
@@ -247,6 +263,125 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
     @Override
     public String getName() {
       return Bundle.LBL_Action_Open();
+    }
+
+    @Override
+    public HelpCtx getHelpCtx() {
+      return null;
+    }
+  }
+  
+  @NbBundle.Messages("LBL_Action_Close=Close")
+  public static class CloseAction extends NodeAction {
+    private static final long serialVersionUID = 1L;
+
+    private CloseAction() {
+      putValue(NAME, Bundle.LBL_Action_Close());
+    }
+
+    @Override
+    protected boolean asynchronous() {
+      return false;
+    }
+
+    @NbBundle.Messages({
+      "# {0} - db name",
+      "MSG_CloseAction_Error=Error closing database {0}"
+    })
+    @Override
+    protected void performAction(Node[] activatedNodes) {
+      for (Node node : activatedNodes) {
+        final DbInfo dbInfo = node.getLookup().lookup(DbInfo.class);
+        
+        try {
+          EvidPreferences.getInstance().removeEvidInstance(dbInfo.getDbFile().getAbsolutePath());
+        } catch (BackingStoreException ex) {
+          DialogDisplayer.getDefault().notifyLater(new NotifyDescriptor.Message(Bundle.MSG_CloseAction_Error(dbInfo.getName()), NotifyDescriptor.ERROR_MESSAGE));
+        }
+      }
+    }
+
+    @Override
+    protected boolean enable(Node[] activatedNodes) {
+      if ((activatedNodes == null) || (activatedNodes.length == 0)) {
+        return false;
+      }
+
+      for (Node node : activatedNodes) {
+        if (node.getLookup().lookup(DbInfo.class) == null) {
+          return false;
+        }
+        
+        final DbInfo dbInfo = node.getLookup().lookup(DbInfo.class);
+        if (dbInfo.isDirty()) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    @Override
+    public String getName() {
+      return Bundle.LBL_Action_Close();
+    }
+
+    @Override
+    public HelpCtx getHelpCtx() {
+      return null;
+    }
+  }
+  
+  @NbBundle.Messages("LBL_Action_ChangePassword=Change Password...")
+  public static class ChangePasswordAction extends NodeAction {
+    private static final long serialVersionUID = 1L;
+
+    private ChangePasswordAction() {
+      putValue(NAME, Bundle.LBL_Action_ChangePassword());
+    }
+
+    @Override
+    protected boolean asynchronous() {
+      return false;
+    }
+
+    @NbBundle.Messages("ChangePasswordAction.dialogTitle=Change Password")
+    @Override
+    protected void performAction(Node[] activatedNodes) {
+      for (Node node : activatedNodes) {
+        final DbInfo dbInfo = node.getLookup().lookup(DbInfo.class);
+        
+        PasswordPanel pp = new PasswordPanel();
+        DialogDescriptor dd = new DialogDescriptor(pp, Bundle.ChangePasswordAction_dialogTitle());
+        if (DialogDescriptor.OK_OPTION.equals(DialogDisplayer.getDefault().notify(dd))) {
+          dbInfo.changePassword(pp.getPassword());
+        }
+      }
+    }
+
+    @Override
+    protected boolean enable(Node[] activatedNodes) {
+      if ((activatedNodes == null) || (activatedNodes.length == 0)) {
+        return false;
+      }
+
+      for (Node node : activatedNodes) {
+        if (node.getLookup().lookup(DbInfo.class) == null) {
+          return false;
+        }
+        
+        final DbInfo dbInfo = node.getLookup().lookup(DbInfo.class);
+        if (!dbInfo.isDbOpened()) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    @Override
+    public String getName() {
+      return Bundle.LBL_Action_ChangePassword();
     }
 
     @Override

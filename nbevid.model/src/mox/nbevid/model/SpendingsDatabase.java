@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import javax.swing.event.ChangeListener;
 import org.openide.util.ChangeSupport;
 
@@ -25,7 +27,6 @@ public class SpendingsDatabase {
   private final String name;
   private final Map<Integer, Item> allItems = new HashMap<>();
   private final List<Item> lastYearItems = new ArrayList<>();
-  private final List<YearInfo> yearInfos = new ArrayList<>();
   private final Map<Integer, Year> years = new HashMap<>();
   
   private final ChangeSupport yearsChangeSupport = new ChangeSupport(this);
@@ -65,17 +66,12 @@ public class SpendingsDatabase {
     }
   }
 
-  public List<YearInfo> getYearInfos() {
-    return yearInfos;
-  }
-  
-  public void addYearInfo(YearInfo yearInfo) {
-    this.yearInfos.add(yearInfo);
-    this.yearInfos.sort(null);
-  }
-
   public Map<Integer, Year> getYears() {
     return years;
+  }
+  
+  public void addYear(Year year) {
+    years.put(year.getYear(), year);
   }
   
   public void addNewYear(Year year) {
@@ -85,7 +81,6 @@ public class SpendingsDatabase {
     }
     
     years.put(year.getYear(), year);
-    addYearInfo(year.createYearInfo());
     lastYearItems.clear();
     lastYearItems.addAll(year.getYearItems());
     
@@ -104,16 +99,12 @@ public class SpendingsDatabase {
     yearsChangeSupport.removeChangeListener(listener);
   }
   
-  public boolean isYearLoaded(YearInfo yearInfo) {
-    return years.get(yearInfo.getYear()) != null;
+  public Year getYear(int year) {
+    return years.get(year);
   }
   
-  public Year getYear(YearInfo yearInfo) {
-    return years.get(yearInfo.getYear());
-  }
-  
-  public void addLoadedYear(Year year) {
-    years.put(year.getYear(), year);
+  public SortedSet<Integer> getYearKeys() {
+    return new TreeSet<>(years.keySet());
   }
 
   @Override

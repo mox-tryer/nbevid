@@ -14,7 +14,6 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeListener;
 import mox.nbevid.model.Item;
 import mox.nbevid.model.SpendingsDatabase;
-import mox.nbevid.model.YearInfo;
 import org.openide.util.ChangeSupport;
 
 
@@ -53,8 +52,8 @@ public class NewYearPanel extends javax.swing.JPanel {
     if (selectedYear <= 0) {
       return false;
     }
-    for (YearInfo yi : dbModel.getYearInfos()) {
-      if (yi.getYear() == selectedYear) {
+    for (int yi : dbModel.getYearKeys()) {
+      if (yi == selectedYear) {
         return false;
       }
     }
