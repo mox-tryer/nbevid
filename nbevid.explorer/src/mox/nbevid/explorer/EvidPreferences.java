@@ -95,6 +95,27 @@ public class EvidPreferences {
     prefs.flush();
   }
   
+  public void removeEvidInstance(String path) throws BackingStoreException {
+    final ArrayList<String> disinheritedChildren = new ArrayList<>();
+    
+    for (String child : prefs.childrenNames()) {
+      if (child.startsWith(EVID_INSTANCE_NODE_PREFIX)) {
+        Preferences evidInstancePrefs = prefs.node(child);
+        String instPath = evidInstancePrefs.get(PATH_PROPERTY, "");
+        if (instPath.equals(path)) {
+          disinheritedChildren.add(child);
+        }
+      }
+    }
+    
+    for (String disinheritedChild : disinheritedChildren) {
+      Preferences evidInstancePrefs = prefs.node(disinheritedChild);
+      if (evidInstancePrefs != null) {
+        evidInstancePrefs.removeNode();
+      }
+    }
+  }
+  
   public boolean hasEvidInstance(String path) throws BackingStoreException {
     for (EvidInstance evidInst : allEvidInstances()) {
       if (Objects.equals(evidInst.getPath(), path)) {

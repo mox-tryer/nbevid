@@ -12,7 +12,10 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.prefs.BackingStoreException;
 import javax.swing.Action;
+import static javax.swing.Action.NAME;
+import mox.nbevid.explorer.EvidPreferences;
 import mox.nbevid.explorer.editors.DbItemsEditorPanel;
 import mox.nbevid.model.SpendingsDatabase;
 import mox.nbevid.model.Year;
@@ -20,6 +23,7 @@ import org.netbeans.core.spi.multiview.MultiViewDescription;
 import org.netbeans.core.spi.multiview.MultiViewFactory;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
+import org.openide.NotifyDescriptor;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Children;
@@ -40,6 +44,7 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
   private final DbInfo dbInfo;
 
   private static final OpenAction openAction = new OpenAction();
+  private static final CloseAction closeAction = new CloseAction();
   private static final NewYearAction newYearAction = new NewYearAction();
 
   private DatabaseNode(DbInfo dbInfo) {
@@ -62,7 +67,7 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
 
   @Override
   public Action[] getActions(boolean context) {
-    return new Action[] {getPreferredAction(), null, newYearAction};
+    return new Action[] {getPreferredAction(), closeAction, null, newYearAction};
   }
 
 
@@ -255,6 +260,67 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
     @Override
     public String getName() {
       return Bundle.LBL_Action_Open();
+    }
+
+    @Override
+    public HelpCtx getHelpCtx() {
+      return null;
+    }
+  }
+  
+  @NbBundle.Messages("LBL_Action_Close=Close")
+  public static class CloseAction extends NodeAction {
+    private static final long serialVersionUID = 1L;
+
+    private CloseAction() {
+      putValue(NAME, Bundle.LBL_Action_Close());
+    }
+
+    @Override
+    protected boolean asynchronous() {
+      return false;
+    }
+
+    @NbBundle.Messages({
+      "# {0} - db name",
+      "MSG_CloseAction_Error=Error closing database {0}"
+    })
+    @Override
+    protected void performAction(Node[] activatedNodes) {
+      for (Node node : activatedNodes) {
+        final DbInfo dbInfo = node.getLookup().lookup(DbInfo.class);
+        
+        try {
+          EvidPreferences.getInstance().removeEvidInstance(dbInfo.getDbFile().getAbsolutePath());
+        } catch (BackingStoreException ex) {
+          DialogDisplayer.getDefault().notifyLater(new NotifyDescriptor.Message(Bundle.MSG_CloseAction_Error(dbInfo.getName()), NotifyDescriptor.ERROR_MESSAGE));
+        }
+      }
+    }
+
+    @Override
+    protected boolean enable(Node[] activatedNodes) {
+      if ((activatedNodes == null) || (activatedNodes.length == 0)) {
+        return false;
+      }
+
+      for (Node node : activatedNodes) {
+        if (node.getLookup().lookup(DbInfo.class) == null) {
+          return false;
+        }
+        
+        final DbInfo dbInfo = node.getLookup().lookup(DbInfo.class);
+        if (dbInfo.isDirty()) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    @Override
+    public String getName() {
+      return Bundle.LBL_Action_Close();
     }
 
     @Override

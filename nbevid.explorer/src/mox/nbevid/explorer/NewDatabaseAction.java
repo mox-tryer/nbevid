@@ -44,7 +44,13 @@ import org.openide.util.NbBundle.Messages;
 })
 @Messages({"CTL_NewDatabaseAction=&New Database", "CTL_NewDatabaseTitle=New Database"})
 public final class NewDatabaseAction implements ActionListener {
-  @Messages({"MSG_ErrorCreatingDb=Error occured while creating database", "MSG_CreatingDb=Creating database", "CTL_CreatingDbTitle=Creating Database"})
+  @Messages({
+    "MSG_ErrorCreatingDb=Error occured while creating database",
+    "MSG_CreatingDb=Creating database",
+    "CTL_CreatingDbTitle=Creating Database",
+    "# {0} - db name",
+    "MSG_DbAlreadyOpened=Database {0} is already opened."
+  })
   @Override
   public void actionPerformed(ActionEvent e) {
     final NewDatabasePanel panel = new NewDatabasePanel();
@@ -59,12 +65,17 @@ public final class NewDatabaseAction implements ActionListener {
         try {
           SpendingsDatabase db = new SpendingsDatabase(panel.getDbName());
           File dbFile = SpendingsDbPersister.getDbFile(panel.getDbFolder(), panel.getDbName()).getCanonicalFile();
+          
+          if (EvidPreferences.getInstance().hasEvidInstance(dbFile.getAbsolutePath())) {
+            DialogDisplayer.getDefault().notifyLater(new NotifyDescriptor.Message(Bundle.MSG_DbAlreadyOpened(panel.getDbName()), NotifyDescriptor.ERROR_MESSAGE));
+            return;
+          }
+          
           dbFile.createNewFile();
           DbInfo dbInfo = new DbInfo(dbFile);
           dbInfo.save(db, panel.getPassword());
           DbInfoRegistry.getInstance().put(dbInfo);
           
-          // TODO: pridat kontroly, aby sa nedala vytvorit databaza, ak uz existuje/je medzi zapamatanymi
           // TODO: pridat moznost "zatvorit" zapamatane databazy
           
           EvidPreferences.getInstance().addEvidInstance(db.getName(), dbFile.getAbsolutePath());

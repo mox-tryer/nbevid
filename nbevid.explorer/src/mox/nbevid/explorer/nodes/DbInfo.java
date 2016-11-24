@@ -30,6 +30,8 @@ public class DbInfo extends AbstractSavable {
   private final Object dbLock = new Object();
   private SpendingsDatabase db;
   private char[] password;
+  
+  private boolean dirty = false;
 
   public DbInfo(File dbFile) {
     this.name = FileUtil.toFileObject(dbFile).getName();
@@ -39,6 +41,8 @@ public class DbInfo extends AbstractSavable {
 
   public void dbChanged() {
     register();
+    
+    this.dirty = true;
   }
 
   public String getName() {
@@ -111,11 +115,16 @@ public class DbInfo extends AbstractSavable {
     return db.getName();
   }
 
+  public boolean isDirty() {
+    return dirty;
+  }
+
   @Override
   protected void handleSave() throws IOException {
     synchronized (dbLock) {
       try {
         SpendingsDbPersister.getDefault().save(db, dbFile, password);
+        this.dirty = false;
       } catch (PersisterException ex) {
         if (ex.getCause() instanceof IOException) {
           throw (IOException) ex.getCause();
