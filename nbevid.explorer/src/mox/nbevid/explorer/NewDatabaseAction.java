@@ -76,8 +76,6 @@ public final class NewDatabaseAction implements ActionListener {
           dbInfo.save(db, panel.getPassword());
           DbInfoRegistry.getInstance().put(dbInfo);
           
-          // TODO: pridat moznost "zatvorit" zapamatane databazy
-          
           EvidPreferences.getInstance().addEvidInstance(db.getName(), dbFile.getAbsolutePath());
         } catch (BackingStoreException | IOException ex) {
           NotifyDescriptor.Message msg = new NotifyDescriptor.Message(Bundle.MSG_ErrorCreatingDb(), NotifyDescriptor.ERROR_MESSAGE);

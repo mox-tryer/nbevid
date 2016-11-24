@@ -86,7 +86,14 @@ public class NewDatabasePanel extends javax.swing.JPanel {
   }
   
   public char[] getPassword() {
-    return passwordField.getPassword();
+    char[] password = passwordField.getPassword();
+    if (password == null) {
+      return new char[0];
+    }
+    
+    char[] copy = new char[password.length];
+    System.arraycopy(password, 0, copy, 0, password.length);
+    return copy;
   }
 
   /**

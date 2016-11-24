@@ -16,6 +16,7 @@ import java.util.prefs.BackingStoreException;
 import javax.swing.Action;
 import static javax.swing.Action.NAME;
 import mox.nbevid.explorer.EvidPreferences;
+import mox.nbevid.explorer.PasswordPanel;
 import mox.nbevid.explorer.editors.DbItemsEditorPanel;
 import mox.nbevid.model.SpendingsDatabase;
 import mox.nbevid.model.Year;
@@ -45,6 +46,7 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
 
   private static final OpenAction openAction = new OpenAction();
   private static final CloseAction closeAction = new CloseAction();
+  private static final ChangePasswordAction changePasswordAction = new ChangePasswordAction();
   private static final NewYearAction newYearAction = new NewYearAction();
 
   private DatabaseNode(DbInfo dbInfo) {
@@ -67,7 +69,7 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
 
   @Override
   public Action[] getActions(boolean context) {
-    return new Action[] {getPreferredAction(), closeAction, null, newYearAction};
+    return new Action[] {getPreferredAction(), closeAction, changePasswordAction, null, newYearAction};
   }
 
 
@@ -99,6 +101,7 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
       if (dbInfo.getDb() != null) {
         dbInfo.getDb().addYearsChangeListener((e) -> refresh(false));
       }
+      dbInfo.addDbOpenChangeListener((e) -> refresh(false));
     }
   }
 
@@ -321,6 +324,64 @@ public class DatabaseNode extends AbstractNode implements Lookup.Provider {
     @Override
     public String getName() {
       return Bundle.LBL_Action_Close();
+    }
+
+    @Override
+    public HelpCtx getHelpCtx() {
+      return null;
+    }
+  }
+  
+  @NbBundle.Messages("LBL_Action_ChangePassword=Change Password...")
+  public static class ChangePasswordAction extends NodeAction {
+    private static final long serialVersionUID = 1L;
+
+    private ChangePasswordAction() {
+      putValue(NAME, Bundle.LBL_Action_ChangePassword());
+    }
+
+    @Override
+    protected boolean asynchronous() {
+      return false;
+    }
+
+    @NbBundle.Messages("ChangePasswordAction.dialogTitle=Change Password")
+    @Override
+    protected void performAction(Node[] activatedNodes) {
+      for (Node node : activatedNodes) {
+        final DbInfo dbInfo = node.getLookup().lookup(DbInfo.class);
+        
+        PasswordPanel pp = new PasswordPanel();
+        DialogDescriptor dd = new DialogDescriptor(pp, Bundle.ChangePasswordAction_dialogTitle());
+        if (DialogDescriptor.OK_OPTION.equals(DialogDisplayer.getDefault().notify(dd))) {
+          dbInfo.changePassword(pp.getPassword());
+        }
+      }
+    }
+
+    @Override
+    protected boolean enable(Node[] activatedNodes) {
+      if ((activatedNodes == null) || (activatedNodes.length == 0)) {
+        return false;
+      }
+
+      for (Node node : activatedNodes) {
+        if (node.getLookup().lookup(DbInfo.class) == null) {
+          return false;
+        }
+        
+        final DbInfo dbInfo = node.getLookup().lookup(DbInfo.class);
+        if (!dbInfo.isDbOpened()) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    @Override
+    public String getName() {
+      return Bundle.LBL_Action_ChangePassword();
     }
 
     @Override

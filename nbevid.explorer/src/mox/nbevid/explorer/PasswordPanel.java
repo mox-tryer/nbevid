@@ -3,24 +3,20 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package mox.nbevid.explorer.nodes;
-
-
-import org.openide.util.NbBundle;
+package mox.nbevid.explorer;
 
 
 /**
  *
  * @author martin
  */
-@NbBundle.Messages({"UnlockDatabasePanel.title=Unlock Database", "UnlockDatabasePanel.message.error=Error unlocking database"})
-public class UnlockDatabasePanel extends javax.swing.JPanel {
-  private static final long serialVersionUID = -3297443481217287855L;
+public class PasswordPanel extends javax.swing.JPanel {
+  private static final long serialVersionUID = -1654109084707573586L;
 
   /**
-   * Creates new form UnlockDatabasePanel
+   * Creates new form PasswordPanel
    */
-  public UnlockDatabasePanel() {
+  public PasswordPanel() {
     initComponents();
   }
   
@@ -46,9 +42,10 @@ public class UnlockDatabasePanel extends javax.swing.JPanel {
     passwordLabel = new javax.swing.JLabel();
     passwordField = new javax.swing.JPasswordField();
 
-    org.openide.awt.Mnemonics.setLocalizedText(passwordLabel, org.openide.util.NbBundle.getMessage(UnlockDatabasePanel.class, "UnlockDatabasePanel.passwordLabel.text", new Object[] {})); // NOI18N
+    passwordLabel.setLabelFor(passwordField);
+    org.openide.awt.Mnemonics.setLocalizedText(passwordLabel, org.openide.util.NbBundle.getMessage(PasswordPanel.class, "PasswordPanel.passwordLabel.text", new Object[] {})); // NOI18N
 
-    passwordField.setText(org.openide.util.NbBundle.getMessage(UnlockDatabasePanel.class, "UnlockDatabasePanel.passwordField.text", new Object[] {})); // NOI18N
+    passwordField.setText(org.openide.util.NbBundle.getMessage(PasswordPanel.class, "PasswordPanel.passwordField.text", new Object[] {})); // NOI18N
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
@@ -56,9 +53,9 @@ public class UnlockDatabasePanel extends javax.swing.JPanel {
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(layout.createSequentialGroup()
         .addContainerGap()
-        .addComponent(passwordLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+        .addComponent(passwordLabel)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(passwordField, javax.swing.GroupLayout.DEFAULT_SIZE, 213, Short.MAX_VALUE)
+        .addComponent(passwordField, javax.swing.GroupLayout.DEFAULT_SIZE, 289, Short.MAX_VALUE)
         .addContainerGap())
     );
     layout.setVerticalGroup(

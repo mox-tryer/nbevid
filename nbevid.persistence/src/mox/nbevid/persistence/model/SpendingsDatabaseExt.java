@@ -19,6 +19,7 @@ import mox.nbevid.model.Year;
  * @author martin
  */
 public class SpendingsDatabaseExt {
+  private int version;
   private String name;
   private List<ItemExt> items = new ArrayList<>();
   private List<Integer> lastYearItems = new ArrayList<>();
@@ -26,6 +27,7 @@ public class SpendingsDatabaseExt {
 
   public static SpendingsDatabaseExt createFromModel(SpendingsDatabase db) {
     SpendingsDatabaseExt tmp = new SpendingsDatabaseExt();
+    tmp.setVersion(1);
     tmp.setName(db.getName());
     tmp.setItems(createItemListExt(db.getAllItems()));
     tmp.setLastYearItems(createLastYearItemsListExt(db.getLastYearItems()));
@@ -57,6 +59,14 @@ public class SpendingsDatabaseExt {
     }
     exts.sort(null);
     return exts;
+  }
+
+  public int getVersion() {
+    return version;
+  }
+
+  public void setVersion(int version) {
+    this.version = version;
   }
 
   public String getName() {

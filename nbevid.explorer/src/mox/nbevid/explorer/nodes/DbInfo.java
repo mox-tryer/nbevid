@@ -9,6 +9,7 @@ package mox.nbevid.explorer.nodes;
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
+import javax.swing.event.ChangeListener;
 import mox.nbevid.model.SpendingsDatabase;
 import mox.nbevid.persistence.PersisterException;
 import mox.nbevid.persistence.SpendingsDbPersister;
@@ -17,6 +18,7 @@ import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
 import org.openide.filesystems.FileUtil;
+import org.openide.util.ChangeSupport;
 
 
 /**
@@ -32,6 +34,8 @@ public class DbInfo extends AbstractSavable {
   private char[] password;
   
   private boolean dirty = false;
+  
+  private final ChangeSupport dbOpenedChangeSupport = new ChangeSupport(this);
 
   public DbInfo(File dbFile) {
     this.name = FileUtil.toFileObject(dbFile).getName();
@@ -84,8 +88,17 @@ public class DbInfo extends AbstractSavable {
       if (db == null) {
         setPassword(password);
         this.db = SpendingsDbPersister.getDefault().load(dbFile, this.password);
+        dbOpenedChangeSupport.fireChange();
       }
     }
+  }
+  
+  public void addDbOpenChangeListener(ChangeListener l) {
+    dbOpenedChangeSupport.addChangeListener(l);
+  }
+  
+  public void removeDbOpenChangeListener(ChangeListener l) {
+    dbOpenedChangeSupport.removeChangeListener(l);
   }
 
   private void setPassword(char[] password) {
@@ -95,6 +108,11 @@ public class DbInfo extends AbstractSavable {
       this.password = new char[password.length];
       System.arraycopy(password, 0, this.password, 0, password.length);
     }
+  }
+  
+  public void changePassword(char[] password) {
+    setPassword(password);
+    dbChanged();
   }
   
   public void save(SpendingsDatabase db, char[] password) throws IOException {
